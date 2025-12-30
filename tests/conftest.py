@@ -1,4 +1,8 @@
+from pathlib import Path
+
 import pytest
+
+from framework.core.driver_manager import DriverManager
 from framework.utils.config_loader import load_config
 from framework.utils.locator_loader import LocatorLoader
 from framework.utils.screenshot import take_screenshot
@@ -9,7 +13,6 @@ def config():
     cfg = load_config()
 
     # 将 paths 里的相对路径统一转换成绝对路径，避免从不同工作目录运行时找不到文件
-    from pathlib import Path
     project_root = Path(cfg.get("_project_root", "."))
     if "paths" in cfg and isinstance(cfg["paths"], dict):
         for k, v in list(cfg["paths"].items()):
@@ -40,16 +43,42 @@ def capture_final_screenshot(driver, case_id: str, cfg: dict | None = None) -> s
         return None
 
 
+@pytest.fixture(scope="session")
+def driver(config, request):
+    driver = DriverManager.get_driver()
+    request.session.driver = driver
+
+    selenium_cfg = config.get("selenium", {}) or {}
+    implicit_wait = selenium_cfg.get("implicit_wait")
+    if implicit_wait is not None:
+        try:
+            driver.implicitly_wait(float(implicit_wait))
+        except Exception:
+            pass
+
+    page_load_timeout = selenium_cfg.get("page_load_timeout")
+    if page_load_timeout is not None:
+        try:
+            driver.set_page_load_timeout(float(page_load_timeout))
+        except Exception:
+            pass
+
+    yield driver
+    DriverManager.quit()
+
+
 @pytest.hookimpl(hookwrapper=True)
-def pytest_runtest_call(item):
-    yield
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    rep = outcome.get_result()
 
-    driver = getattr(item.session, "driver", None)
-    if not driver:
-        return
+    if rep.when == "call":
+        driver = getattr(item.session, "driver", None)
+        if not driver:
+            return
 
-    screenshot_dir = item.config.getoption("--screenshot-dir", default="output/screenshots")
-    path = take_screenshot(driver, screenshot_dir, prefix=getattr(item, "name", "case"))
+        screenshot_dir = Path("output/screenshots")
+        case_id = item.nodeid.replace("/", "_").replace("::", "__")
+        path = take_screenshot(driver, str(screenshot_dir), prefix=case_id)
 
-    # 把截图路径挂到 item 上
-    setattr(item, "final_screenshot", path)
+        setattr(item, "final_screenshot", path)

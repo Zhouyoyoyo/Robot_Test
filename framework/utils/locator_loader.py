@@ -1,5 +1,7 @@
-import yaml
 import os
+
+import yaml
+from selenium.webdriver.common.by import By
 
 
 class LocatorLoader:
@@ -26,3 +28,42 @@ class LocatorLoader:
             return self.data[page][name]
         except KeyError:
             raise KeyError(f"Locator not found: {page}.{name}")
+
+
+class PageLocators:
+    def __init__(self, loader: LocatorLoader, page_name: str):
+        self._loader = loader
+        self._page_name = page_name
+
+    def get(self, name):
+        locator = self._loader.get(self._page_name, name)
+        return _convert_locator(locator["by"], locator["value"])
+
+    def get_shadow_host(self, name):
+        locator = self._loader.get(self._page_name, name)
+        if "shadow_host" not in locator:
+            raise KeyError(f"Locator not found: {self._page_name}.{name}.shadow_host")
+        return _convert_locator(locator["by"], locator["shadow_host"])
+
+
+def _convert_locator(locator_type: str, locator_value: str):
+    locator_type = (locator_type or "").lower()
+    if locator_type == "id":
+        return By.ID, locator_value
+    if locator_type == "xpath":
+        return By.XPATH, locator_value
+    if locator_type == "name":
+        return By.NAME, locator_value
+    if locator_type == "css":
+        return By.CSS_SELECTOR, locator_value
+    if locator_type == "class":
+        return By.CLASS_NAME, locator_value
+    raise ValueError(f"Unsupported locator type: {locator_type}")
+
+
+def build_page_locators(locator_loader, page_name: str):
+    if isinstance(locator_loader, PageLocators):
+        return locator_loader
+    if page_name is None:
+        return locator_loader
+    return PageLocators(locator_loader, page_name)

@@ -86,3 +86,10 @@ def get_logger() -> logging.Logger:
 
     logger._inited = True
     return logger
+
+
+def get_page_logger(page_name: str | None = None) -> logging.Logger:
+    logger = get_logger()
+    if page_name:
+        logger = logging.LoggerAdapter(logger, {"page": page_name})
+    return logger
