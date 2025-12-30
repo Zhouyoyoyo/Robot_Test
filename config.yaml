@@ -2,6 +2,9 @@ project:
   aurix_app: https://demo
   aurix_fbl: https://demo
   browser: edge
+  urls:
+    "1": https://url-for-sheet-1
+    "2": https://url-for-sheet-2
 
 paths:
   data: data/testdata.xlsx
@@ -55,5 +58,4 @@ mail:
   receivers:
     - botao_zhou@qq.com
     - botao_zhou@qq.com
-
 

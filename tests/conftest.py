@@ -81,3 +81,61 @@ def pytest_runtest_makereport(item, call):
         path = on_case_finished(item, rep, driver)
 
         setattr(item, "final_screenshot", path)
+
+import pytest
+from openpyxl import load_workbook
+from framework.utils.excel_loader import load_excel_kv
+
+
+def pytest_generate_tests(metafunc):
+    """
+    这里负责决定：测试要跑哪些 sheet。
+    """
+    if "sheet_name" in metafunc.fixturenames:
+        config = metafunc.config._store.get("config_obj")
+        if config is None:
+            from framework.utils.config_loader import load_config
+            config = load_config()
+
+        excel_path = config["paths"]["data"]
+        wb = load_workbook(excel_path, read_only=True, data_only=True)
+
+        sheet_names = wb.sheetnames
+
+        if not sheet_names:
+            raise RuntimeError("Excel 中没有任何 sheet")
+
+        metafunc.parametrize(
+            "sheet_name",
+            sheet_names,
+            ids=[f"sheet={name}" for name in sheet_names],
+        )
+
+
+@pytest.fixture
+def case_data(config, sheet_name):
+    """
+    case_data 永远只来自当前 sheet_name
+    """
+    return load_excel_kv(
+        config["paths"]["data"],
+        sheet_name,
+    )
+
+
+@pytest.fixture
+def base_url(config, sheet_name):
+    """
+    base_url 只允许来自 project.urls
+    """
+    urls = config.get("project", {}).get("urls")
+
+    if not isinstance(urls, dict):
+        raise RuntimeError("config.yaml 中缺少 project.urls")
+
+    if sheet_name not in urls:
+        raise RuntimeError(
+            f"project.urls 中未配置 sheet [{sheet_name}] 的 URL"
+        )
+
+    return urls[sheet_name]
