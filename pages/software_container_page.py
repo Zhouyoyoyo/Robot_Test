@@ -5,7 +5,7 @@ Software container page module.
 Author: taobo.zhou
 """
 
-from framework.base_page import BasePage
+from framework.core.base_page import BasePage
 
 
 class SoftwareContainerPage(BasePage):
@@ -65,7 +65,6 @@ class SoftwareContainerPage(BasePage):
         self.mouse_click("version_confirm_button")
 
         self.wait_visible("succeeded",60*5)
-
 
 
 

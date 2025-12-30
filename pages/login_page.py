@@ -5,7 +5,7 @@ Login page module.
 Author: taobo.zhou
 """
 
-from framework.base_page import BasePage
+from framework.core.base_page import BasePage
 from framework.pingid_reader import PingIDOtpManager
 
 
