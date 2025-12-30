@@ -2,7 +2,6 @@
 
 Browser driver factory module.
 
-作者: taobo.zhou
 Author: taobo.zhou
 """
 

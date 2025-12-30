@@ -2,7 +2,6 @@
 
 Logger module.
 
-作者: taobo.zhou
 Author: taobo.zhou
 """
 
@@ -23,7 +22,6 @@ class _InjectTestNameFilter(logging.Filter):
 
     Logger filter.
 
-    作者: taobo.zhou
     Author: taobo.zhou
     """
 

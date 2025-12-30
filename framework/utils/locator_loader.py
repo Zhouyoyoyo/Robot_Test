@@ -2,7 +2,6 @@
 
 Locator loader module.
 
-作者: taobo.zhou
 Author: taobo.zhou
 """
 
@@ -17,7 +16,6 @@ class LocatorLoader:
 
     Locator loader.
 
-    作者: taobo.zhou
     Author: taobo.zhou
     """
     def __init__(self, yaml_path):
@@ -49,7 +47,6 @@ class PageLocators:
 
     Page locator proxy.
 
-    作者: taobo.zhou
     Author: taobo.zhou
     """
     def __init__(self, loader: LocatorLoader, page_name: str):

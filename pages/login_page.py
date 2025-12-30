@@ -2,7 +2,6 @@
 
 Login page module.
 
-作者: taobo.zhou
 Author: taobo.zhou
 """
 
@@ -15,7 +14,6 @@ class LoginPage(BasePage):
 
     Login page object.
 
-    作者: taobo.zhou
     Author: taobo.zhou
     """
     def __init__(self, driver, locator_loader):

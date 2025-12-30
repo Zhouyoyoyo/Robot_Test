@@ -2,7 +2,6 @@
 
 Shadow DOM interaction module.
 
-作者: taobo.zhou
 Author: taobo.zhou
 """
 
@@ -14,7 +13,6 @@ class ShadowDomMixin:
 
     Shadow DOM interaction mixin.
 
-    作者: taobo.zhou
     Author: taobo.zhou
     """
     def _get_shadow_host_locator(self, name):

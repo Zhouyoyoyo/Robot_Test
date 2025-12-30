@@ -2,7 +2,6 @@
 
 PingID OTP manager module.
 
-作者: taobo.zhou
 Author: taobo.zhou
 """
 
@@ -32,7 +31,6 @@ class PingIDOtpManager:
 
     PingID OTP manager.
 
-    作者: taobo.zhou
     Author: taobo.zhou
     """
     _instance = None

@@ -2,7 +2,6 @@
 
 Runner module.
 
-作者: taobo.zhou
 Author: taobo.zhou
 """
 
@@ -35,7 +34,6 @@ class CaseResult:
 
     Case result data structure.
 
-    作者: taobo.zhou
     Author: taobo.zhou
     """
     case_id: str

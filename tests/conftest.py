@@ -2,7 +2,6 @@
 
 Test fixture module.
 
-作者: taobo.zhou
 Author: taobo.zhou
 """
 

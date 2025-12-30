@@ -2,7 +2,6 @@
 
 Page context module.
 
-作者: taobo.zhou
 Author: taobo.zhou
 """
 
@@ -12,7 +11,6 @@ class PageContext:
 
     Page context data object.
 
-    作者: taobo.zhou
     Author: taobo.zhou
     """
     def __init__(self, driver, locator_loader, logger, page_name=None):

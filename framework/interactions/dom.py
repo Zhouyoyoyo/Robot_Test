@@ -2,7 +2,6 @@
 
 DOM interaction module.
 
-作者: taobo.zhou
 Author: taobo.zhou
 """
 
@@ -14,7 +13,6 @@ class DomMixin:
 
     DOM interaction mixin.
 
-    作者: taobo.zhou
     Author: taobo.zhou
     """
     def _get_locator(self, name):
