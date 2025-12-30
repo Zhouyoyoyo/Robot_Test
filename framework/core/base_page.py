@@ -2,7 +2,6 @@
 
 Core base page module.
 
-作者: taobo.zhou
 Author: taobo.zhou
 """
 
@@ -25,7 +24,6 @@ class BasePage(
 
     Base page class.
 
-    作者: taobo.zhou
     Author: taobo.zhou
     """
     def __init__(self, driver, locator_loader, page_name=None):

@@ -2,7 +2,6 @@
 
 Wait interaction module.
 
-作者: taobo.zhou
 Author: taobo.zhou
 """
 
@@ -17,7 +16,6 @@ class WaitMixin:
 
     Wait interaction mixin.
 
-    作者: taobo.zhou
     Author: taobo.zhou
     """
     def wait_page_ready(self, timeout=30):

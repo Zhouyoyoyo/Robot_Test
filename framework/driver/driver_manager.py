@@ -2,7 +2,6 @@
 
 Driver manager module.
 
-作者: taobo.zhou
 Author: taobo.zhou
 """
 
@@ -14,7 +13,6 @@ class DriverManager:
 
     Driver manager.
 
-    作者: taobo.zhou
     Author: taobo.zhou
     """
     _driver = None

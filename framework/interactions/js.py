@@ -2,7 +2,6 @@
 
 JavaScript interaction module.
 
-作者: taobo.zhou
 Author: taobo.zhou
 """
 
@@ -12,7 +11,6 @@ class JsMixin:
 
     JavaScript interaction mixin.
 
-    作者: taobo.zhou
     Author: taobo.zhou
     """
     def js_click(self, name):

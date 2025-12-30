@@ -2,7 +2,6 @@
 
 Mouse interaction module.
 
-作者: taobo.zhou
 Author: taobo.zhou
 """
 
@@ -14,7 +13,6 @@ class MouseMixin:
 
     Mouse interaction mixin.
 
-    作者: taobo.zhou
     Author: taobo.zhou
     """
     def click(self, name):

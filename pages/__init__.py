@@ -2,6 +2,5 @@
 
 Page object package.
 
-作者: taobo.zhou
 Author: taobo.zhou
 """
