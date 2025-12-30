@@ -7,6 +7,7 @@ Author: taobo.zhou
 
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 from typing import Iterable
 
@@ -46,6 +47,17 @@ def junit_path(attempt: int) -> Path:
     return OUTPUT_DIR / f"junit_attempt_{attempt}.xml"
 
 
+def finalize_junit(final_attempt: int) -> None:
+    """Publish final junit result to output/junit.xml for a single source of truth."""
+    src = junit_path(final_attempt)
+    dst = OUTPUT_DIR / "junit.xml"
+    try:
+        if src.exists():
+            shutil.copy2(src, dst)
+    except Exception:
+        pass
+
+
 def _run_round(
     attempt: int,
     base_args: list[str],
@@ -83,6 +95,7 @@ def main() -> int:
         retryable_nodeids = [n for n, can_retry in failed_cases if can_retry]
         non_retryable_nodeids = [n for n, can_retry in failed_cases if not can_retry]
 
+    finalize_junit(attempt)
     return code
 
 
