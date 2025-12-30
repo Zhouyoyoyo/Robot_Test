@@ -81,6 +81,8 @@ def build_html_report(
 
   <td>{r.start_time}</td>
   <td>{r.end_time}</td>
+  <td>{r.attempt}</td>
+  <td>{"Yes" if r.retried else "No"}</td>
 
   <td>
     <span class="status {r.status}">
@@ -156,6 +158,8 @@ pre {{
   <th>用例参数</th>
   <th>开始时间</th>
   <th>结束时间</th>
+  <th>Attempt</th>
+  <th>Retried</th>
   <th>结果</th>
   <th>备注</th>
 </tr>
