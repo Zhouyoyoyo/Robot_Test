@@ -1,0 +1,6 @@
+selenium
+pytest
+openpyxl
+pyyaml
+psutil
+pywin32
