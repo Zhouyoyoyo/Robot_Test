@@ -8,9 +8,11 @@ Author: taobo.zhou
 from pathlib import Path
 
 import pytest
+from openpyxl import load_workbook
 
 from framework.core.driver_manager import DriverManager
 from framework.utils.config_loader import load_config
+from framework.utils.excel_loader import load_excel_kv
 from framework.utils.locator_loader import LocatorLoader
 from framework.reporting.lifecycle import on_case_finished
 from framework.utils.screenshot import take_screenshot
@@ -82,60 +84,51 @@ def pytest_runtest_makereport(item, call):
 
         setattr(item, "final_screenshot", path)
 
-import pytest
-from openpyxl import load_workbook
-from framework.utils.excel_loader import load_excel_kv
-
 
 def pytest_generate_tests(metafunc):
     """
-    这里负责决定：测试要跑哪些 sheet。
+    负责把 Excel 的每个 sheet 变成一个 pytest 参数化用例。
+    失败重跑时，pytest 会再次用相同的 sheet_name 调用该用例，因此会使用同一份 sheet 数据。
     """
-    if "sheet_name" in metafunc.fixturenames:
-        config = metafunc.config._store.get("config_obj")
-        if config is None:
-            from framework.utils.config_loader import load_config
-            config = load_config()
+    if "sheet_name" not in metafunc.fixturenames:
+        return
 
-        excel_path = config["paths"]["data"]
-        wb = load_workbook(excel_path, read_only=True, data_only=True)
+    # 这里必须独立加载配置，不能依赖任何 pytest 内部字段（禁止使用 metafunc.config._store 之类的非标准对象）
+    cfg = load_config()
 
-        sheet_names = wb.sheetnames
+    project_root = Path(cfg.get("_project_root", "."))
+    data_path = cfg["paths"]["data"]
+    if isinstance(data_path, str) and data_path and not Path(data_path).is_absolute():
+        data_path = str((project_root / data_path).resolve())
 
-        if not sheet_names:
-            raise RuntimeError("Excel 中没有任何 sheet")
+    if not Path(data_path).exists():
+        raise RuntimeError(f"Excel 数据文件不存在: {data_path}")
 
-        metafunc.parametrize(
-            "sheet_name",
-            sheet_names,
-            ids=[f"sheet={name}" for name in sheet_names],
-        )
+    wb = load_workbook(data_path, read_only=True, data_only=True)
+    sheet_names = wb.sheetnames
 
+    # 强制：只允许 sheet 名为 "1" 和 "2"
+    # 若 Excel 多了或少了 sheet，直接失败，让用户修 Excel
+    if sheet_names != ["1", "2"]:
+        raise RuntimeError(f"Excel 的 sheet 必须严格为 ['1','2']，当前为: {sheet_names}")
 
-@pytest.fixture
-def case_data(config, sheet_name):
-    """
-    case_data 永远只来自当前 sheet_name
-    """
-    return load_excel_kv(
-        config["paths"]["data"],
-        sheet_name,
+    metafunc.parametrize(
+        "sheet_name",
+        sheet_names,
+        ids=[f"sheet={name}" for name in sheet_names],
     )
 
 
 @pytest.fixture
+def case_data(config, sheet_name):
+    # 永远只读取当前 sheet_name 的数据，失败重跑仍然使用同一 sheet_name
+    return load_excel_kv(config["paths"]["data"], sheet_name)
+
+
+@pytest.fixture
 def base_url(config, sheet_name):
-    """
-    base_url 只允许来自 project.urls
-    """
-    urls = config.get("project", {}).get("urls")
-
-    if not isinstance(urls, dict):
-        raise RuntimeError("config.yaml 中缺少 project.urls")
-
+    # base_url 只能来自 config.yaml: project.urls
+    urls = config["project"]["urls"]
     if sheet_name not in urls:
-        raise RuntimeError(
-            f"project.urls 中未配置 sheet [{sheet_name}] 的 URL"
-        )
-
+        raise RuntimeError(f"config.yaml 中 project.urls 未配置 sheet [{sheet_name}] 的 URL")
     return urls[sheet_name]
