@@ -28,3 +28,8 @@ class DriverManager:
         if cls._driver:
             cls._driver.quit()
             cls._driver = None
+
+    @classmethod
+    def quit_driver(cls):
+        # alias for compatibility
+        cls.quit()

@@ -54,6 +54,10 @@ class RetryPolicy:
 
         text = failure_text.lower()
 
+        # Safety guard: if retryable keywords is empty, never retry
+        if not cls._retryable_keywords:
+            return False
+
         # 1️⃣ 一票否决（断言 / 逻辑失败）
         for k in cls._non_retryable_keywords:
             if k.lower() in text:
