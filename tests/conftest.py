@@ -87,30 +87,26 @@ def pytest_runtest_makereport(item, call):
 
 def pytest_generate_tests(metafunc):
     """
-    负责把 Excel 的每个 sheet 变成一个 pytest 参数化用例。
-    失败重跑时，pytest 会再次用相同的 sheet_name 调用该用例，因此会使用同一份 sheet 数据。
+    将 Excel 中的每一个 sheet 转换为一个 pytest 用例
     """
     if "sheet_name" not in metafunc.fixturenames:
         return
 
-    # 这里必须独立加载配置，不能依赖任何 pytest 内部字段（禁止使用 metafunc.config._store 之类的非标准对象）
     cfg = load_config()
 
     project_root = Path(cfg.get("_project_root", "."))
     data_path = cfg["paths"]["data"]
-    if isinstance(data_path, str) and data_path and not Path(data_path).is_absolute():
-        data_path = str((project_root / data_path).resolve())
+    if not Path(data_path).is_absolute():
+        data_path = (project_root / data_path).resolve()
 
-    if not Path(data_path).exists():
+    if not data_path.exists():
         raise RuntimeError(f"Excel 数据文件不存在: {data_path}")
 
     wb = load_workbook(data_path, read_only=True, data_only=True)
     sheet_names = wb.sheetnames
 
-    # 强制：只允许 sheet 名为 "1" 和 "2"
-    # 若 Excel 多了或少了 sheet，直接失败，让用户修 Excel
-    if sheet_names != ["1", "2"]:
-        raise RuntimeError(f"Excel 的 sheet 必须严格为 ['1','2']，当前为: {sheet_names}")
+    if not sheet_names:
+        raise RuntimeError("Excel 中至少必须存在一个 sheet")
 
     metafunc.parametrize(
         "sheet_name",
@@ -121,14 +117,28 @@ def pytest_generate_tests(metafunc):
 
 @pytest.fixture
 def case_data(config, sheet_name):
-    # 永远只读取当前 sheet_name 的数据，失败重跑仍然使用同一 sheet_name
-    return load_excel_kv(config["paths"]["data"], sheet_name)
+    """
+    当前测试用例的数据，只来源于当前 sheet_name
+    """
+    return load_excel_kv(
+        config["paths"]["data"],
+        sheet_name,
+    )
 
 
 @pytest.fixture
 def base_url(config, sheet_name):
-    # base_url 只能来自 config.yaml: project.urls
-    urls = config["project"]["urls"]
+    """
+    当前测试用例使用的 URL，
+    必须与 sheet_name 同名
+    """
+    urls = config.get("project", {}).get("urls")
+    if not isinstance(urls, dict):
+        raise RuntimeError("config.yaml 中缺少 project.urls")
+
     if sheet_name not in urls:
-        raise RuntimeError(f"config.yaml 中 project.urls 未配置 sheet [{sheet_name}] 的 URL")
+        raise RuntimeError(
+            f"config.yaml 的 project.urls 中未配置 sheet [{sheet_name}] 的 URL"
+        )
+
     return urls[sheet_name]
