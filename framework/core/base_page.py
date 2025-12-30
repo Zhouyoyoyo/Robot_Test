@@ -28,3 +28,14 @@ class BasePage(
     def _bind_driver_to_mixins(self, driver):
         for mixin in (DomMixin, WaitMixin, JsMixin, MouseMixin, ShadowDomMixin):
             setattr(self, f"_{mixin.__name__}__driver", driver)
+
+    def _before_action(self, action: str, target: str | None = None):
+        """
+        Action hook (reserved)
+
+        用于未来统一：
+        - wait_page_ready
+        - wait_dom_stable
+        - tracing / metrics
+        """
+        pass

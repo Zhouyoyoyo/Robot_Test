@@ -46,6 +46,9 @@ class ShadowDomMixin:
         input_element.send_keys(text)
 
     def click_shadow_dom(self, locator_name: str):
+        # NOTE:
+        # This method intentionally does NOT call _before_action().
+        # Hook is reserved for future framework-level orchestration.
         self._log.info(
             f"Starting the process to upload file in Shadow DOM for locator: {locator_name}"
         )
