@@ -58,46 +58,6 @@ def _run_round(
     return pytest.main(args)
 
 
-def write_simple_html_report(
-    report_path: Path,
-    retryable_failures: list[str],
-    non_retryable_failures: list[str],
-) -> None:
-    def render_list(items: list[str]) -> str:
-        if not items:
-            return "<p class='muted'>None</p>"
-        rows = "".join(f"<li>{item}</li>" for item in items)
-        return f"<ul>{rows}</ul>"
-
-    html = f"""<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<style>
-body {{ font-family: Arial, sans-serif; font-size: 13px; color: #222; }}
-section {{ margin-bottom: 16px; }}
-.muted {{ color: #777; }}
-</style>
-</head>
-<body>
-<h2>Retry Report</h2>
-
-<section>
-  <h3>Retryable Failures</h3>
-  {render_list(retryable_failures)}
-</section>
-
-<section>
-  <h3>Non-Retryable Failures (Assertion / Logic)</h3>
-  {render_list(non_retryable_failures)}
-</section>
-</body>
-</html>"""
-
-    report_path.parent.mkdir(parents=True, exist_ok=True)
-    report_path.write_text(html, encoding="utf-8")
-
-
 def main() -> int:
     base_args = _strip_junit_args(build_pytest_args())
     max_retry = RetryPolicy.max_retry()
@@ -122,12 +82,6 @@ def main() -> int:
         failed_cases = parse_failed_cases_with_retry_flag(junit_path(attempt))
         retryable_nodeids = [n for n, can_retry in failed_cases if can_retry]
         non_retryable_nodeids = [n for n, can_retry in failed_cases if not can_retry]
-
-    write_simple_html_report(
-        OUTPUT_DIR / "retry_report.html",
-        retryable_failures=retryable_nodeids,
-        non_retryable_failures=non_retryable_nodeids,
-    )
 
     return code
 

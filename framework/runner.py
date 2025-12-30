@@ -8,6 +8,7 @@ Author: taobo.zhou
 from __future__ import annotations
 from tests.conftest import capture_final_screenshot
 from framework.utils.html_report import build_html_report
+from framework.utils.retry_policy import RetryPolicy
 
 import os
 import time
@@ -45,6 +46,9 @@ class CaseResult:
     end_time: str
     error: str | None = None
     screenshot: str | None = None
+    attempt: int = 1
+    retried: bool = False
+    retry_reason: str | None = None
 
 
 def _init_config() -> Dict[str, Any]:
@@ -102,75 +106,97 @@ def _apply_driver_timeouts(driver, cfg: Dict[str, Any]) -> None:
 
 def _run_one_case(cfg: Dict[str, Any], sheet: str, iteration: int, data: Dict[str, Any]) -> CaseResult:
     case_id = f"{sheet}__{iteration:02d}"
-    set_current_test(case_id)
     log = get_logger()
 
-    start_dt = datetime.now()
-    start_ts = time.time()
+    max_retry = RetryPolicy.max_retry()
+    max_attempt = 1 + max_retry
 
-    driver = None
-    screenshot_path = None
-    status = "FAIL"
-    err = None
+    last_reason = None
 
-    try:
-        driver = create_driver(cfg["project"]["browser"])
-        _apply_driver_timeouts(driver, cfg)
+    for attempt in range(1, max_attempt + 1):
+        set_current_test(case_id)
+        start_dt = datetime.now()
+        start_ts = time.time()
 
-        username = data["login.username"]
-        password = data["login.password"]
-        url = _get_case_url(cfg, sheet, data)
-
-        page_login = LoginPage(driver, cfg["locator_loader"])
-        page_login.open(url)
-        page_login.wait_page_ready()
-        page_login.wait_visible("next_button")
-        page_login.login(username, password)
-
-        page = SoftwareContainerPage(driver, cfg["locator_loader"])
-        page.create_version(
-            data["version"],
-            data["semantic_version"],
-            data["general_setting"],
-            data["software_part_number"],
-            data["software_YMP_version"],
-            data["dependencies"],
-            data["file_upload_ODX_F"],
-            data["file_upload_flashware"],
-        )
-
-        status = "PASS"
-
-    except Exception as e:
-        err = f"{type(e).__name__}: {e}"
-        log.error(f"[CASE_DONE] {case_id} FAIL err={err}")
-        log.error(traceback.format_exc())
-
-    finally:
-        if driver is not None:
-            screenshot_path = capture_final_screenshot(driver, case_id, cfg)
-
-        end_dt = datetime.now()
-        seconds = time.time() - start_ts
+        driver = None
+        screenshot_path = None
+        status = "FAIL"
+        err = None
+        can_retry = False
 
         try:
-            if driver is not None:
-                driver.quit()
-        except Exception:
-            pass
-        set_current_test("-")
+            driver = create_driver(cfg["project"]["browser"])
+            _apply_driver_timeouts(driver, cfg)
 
-    return CaseResult(
-        case_id=case_id,
-        sheet=sheet,
-        iteration=iteration,
-        status=status,
-        seconds=seconds,
-        start_time=start_dt.strftime("%Y-%m-%d %H:%M:%S"),
-        end_time=end_dt.strftime("%Y-%m-%d %H:%M:%S"),
-        error=err,
-        screenshot=screenshot_path,
-    )
+            username = data["login.username"]
+            password = data["login.password"]
+            url = _get_case_url(cfg, sheet, data)
+
+            page_login = LoginPage(driver, cfg["locator_loader"])
+            page_login.open(url)
+            page_login.wait_page_ready()
+            page_login.wait_visible("next_button")
+            page_login.login(username, password)
+
+            page = SoftwareContainerPage(driver, cfg["locator_loader"])
+            page.create_version(
+                data["version"],
+                data["semantic_version"],
+                data["general_setting"],
+                data["software_part_number"],
+                data["software_YMP_version"],
+                data["dependencies"],
+                data["file_upload_ODX_F"],
+                data["file_upload_flashware"],
+            )
+
+            status = "PASS"
+
+        except Exception as e:
+            err = f"{type(e).__name__}: {e}"
+            err_text = f"{err}\n{traceback.format_exc()}"
+            last_reason = err
+            can_retry = RetryPolicy.is_retryable(err_text)
+            log.error(f"[CASE_DONE] {case_id} FAIL err={err}")
+            log.error(traceback.format_exc())
+            if can_retry and attempt < max_attempt:
+                log.warning(f"[CASE_RETRY] {case_id} attempt={attempt} err={err}")
+
+        finally:
+            if driver is not None:
+                screenshot_path = capture_final_screenshot(
+                    driver,
+                    f"{case_id}_a{attempt}",
+                    cfg,
+                )
+
+            end_dt = datetime.now()
+            seconds = time.time() - start_ts
+
+            try:
+                if driver is not None:
+                    driver.quit()
+            except Exception:
+                pass
+            set_current_test("-")
+
+        if status == "PASS" or not (can_retry and attempt < max_attempt):
+            return CaseResult(
+                case_id=case_id,
+                sheet=sheet,
+                iteration=iteration,
+                status=status,
+                seconds=seconds,
+                start_time=start_dt.strftime("%Y-%m-%d %H:%M:%S"),
+                end_time=end_dt.strftime("%Y-%m-%d %H:%M:%S"),
+                error=err,
+                screenshot=screenshot_path,
+                attempt=attempt,
+                retried=(attempt > 1),
+                retry_reason=last_reason if attempt > 1 else None,
+            )
+
+    raise RuntimeError(f"[CASE_DONE] {case_id} did not produce a result")
 
 
 def _write_summary(results: List[CaseResult], out_dir: str) -> str:
