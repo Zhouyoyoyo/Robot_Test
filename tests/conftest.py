@@ -6,6 +6,7 @@ Author: taobo.zhou
 """
 
 from pathlib import Path
+import time
 
 import pytest
 from openpyxl import load_workbook
@@ -14,8 +15,6 @@ from framework.core.driver_manager import DriverManager
 from framework.utils.config_loader import load_config
 from framework.utils.excel_loader import load_excel_kv
 from framework.utils.locator_loader import LocatorLoader
-from framework.reporting.lifecycle import on_case_finished
-from framework.utils.screenshot import take_screenshot
 
 
 @pytest.fixture(scope="session")
@@ -34,16 +33,6 @@ def config():
     cfg["locator_loader"] = loader
 
     return cfg
-
-
-def capture_final_screenshot(driver, case_id: str, cfg: dict | None = None) -> str | None:
-    try:
-        folder = "output/screenshots"
-        if cfg and isinstance(cfg, dict):
-            folder = (cfg.get("paths") or {}).get("screenshots", folder)
-        return take_screenshot(driver, folder, prefix=case_id)
-    except Exception:
-        return None
 
 
 @pytest.fixture(scope="session")
@@ -70,21 +59,6 @@ def driver(config, request):
     DriverManager.quit()
 
 
-@pytest.hookimpl(hookwrapper=True)
-def pytest_runtest_makereport(item, call):
-    outcome = yield
-    rep = outcome.get_result()
-
-    if rep.when == "call":
-        driver = getattr(item.session, "driver", None)
-        if not driver:
-            return
-
-        path = on_case_finished(item, rep, driver)
-
-        setattr(item, "final_screenshot", path)
-
-
 def pytest_generate_tests(metafunc):
     """
     将 Excel 中的每一个 sheet 转换为一个 pytest 用例
@@ -95,14 +69,14 @@ def pytest_generate_tests(metafunc):
     cfg = load_config()
 
     project_root = Path(cfg.get("_project_root", "."))
-    data_path = cfg["paths"]["data"]
-    if not Path(data_path).is_absolute():
+    data_path = Path(cfg["paths"]["data"])
+    if not data_path.is_absolute():
         data_path = (project_root / data_path).resolve()
 
     if not data_path.exists():
         raise RuntimeError(f"Excel 数据文件不存在: {data_path}")
 
-    wb = load_workbook(data_path, read_only=True, data_only=True)
+    wb = load_workbook(str(data_path), read_only=True, data_only=True)
     sheet_names = wb.sheetnames
 
     if not sheet_names:
@@ -142,3 +116,6 @@ def base_url(config, sheet_name):
         )
 
     return urls[sheet_name]
+
+
+pytest_plugins = ["tests.pytest_hooks"]
