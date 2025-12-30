@@ -1,0 +1,75 @@
+LoginPage:
+  username_input:
+    by: id
+    value: userid
+  password_input:
+    by: id
+    value: password
+  next_button:
+    by: id
+    value: "next-btn"
+  login_button:
+    by: id
+    value: loginSubmitButton
+  ping_id_input:
+    by: id
+    value: otp
+  ping_id_login_button:
+    by: xpath
+    value: //div[@class="buttons"]/input[@type="submit"]
+
+SoftwareContainerPage:
+  create_version_button:
+    by: xpath
+    value: //*[@id="portal-header"]/wb-button[@data-test-id="create-version-button"]
+  select_version:
+    by: xpath
+    value: //*[@id="upload-general-settings"]//select[@aria-label="Select version"]
+  release_candidate:
+    by: xpath
+    value: //*[@data-test-id="toggle-release"]/div
+  MB_conform_flashable:
+    by: xpath
+    value: //*[@data-test-id="toggle-mb-conform-flashable"]/div
+  next_button:
+    by: xpath
+    value: //*[@id="portal-header"]/wb-button[@data-test-id="create-sw-container-version-confirm-btn"]
+  general_setting:
+    by: xpath
+    value: //*[@data-test-id="sw-upload-sw-container-data"]//select[@aria-label="General setting"]
+  semantic_version:
+    by: xpath
+    shadow_host: //*[@data-test-id="sem-version-input"]
+    value: //input[@type="text"]
+  software_part_number:
+    by: xpath
+    shadow_host: //*[@data-test-id="sw-partnumber-input"]
+    value: //input[@type="text"]
+  software_YMP_version:
+    by: xpath
+    shadow_host: //*[@data-test-id="sw-ywp-version-input"]
+    value: //input[@type="text"]
+  dependencies:
+    by: xpath
+    shadow_host: //*[@data-test-id="dependencies-input"]
+    value: //*[@data-test-id="dependencies-input"]//textarea
+  file_upload_ODX_F:
+    by: css
+    shadow_host: wb-file-input[data-test-id='file-input']
+    value: "#input"
+  file_upload_flashware:
+    by: xpath
+    shadow_host: (//*[@data-test-id="file-input"])[2]
+    value: //*[@id="input"]
+  upload_button:
+    by: xpath
+    value: '//wb-button[@data-test-id="create-version-sw-upload"]'
+  error_message:
+    by: xpath
+    value: '//div[@data-test-id="create-version-notification-status-error"]//div[@data-test-id="message"]'
+  version_confirm_button:
+    by: xpath
+    value: '//*[@data-test-id="create-sw-container-version-confirm-btn"]'
+  succeeded:
+    by: xpath
+    value: '//*[@status="SUCCEEDED"]'
