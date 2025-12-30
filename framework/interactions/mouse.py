@@ -2,6 +2,9 @@ from selenium.webdriver import ActionChains
 
 
 class MouseMixin:
+    # NOTE:
+    # This method intentionally does NOT call _before_action().
+    # Hook is reserved for future framework-level orchestration.
     def click(self, name):
         el = self._find(name)
         self._log.info(f"[MOUSE_CLICK] {self._page_name}.{name}")

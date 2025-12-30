@@ -1,3 +1,12 @@
+"""
+WaitMixin 职责说明：
+
+1. 页面级等待（page ready / dom stable）
+2. 元素级显式等待（visible / clickable / disabled）
+3. 不处理业务语义
+4. 不包含截图 / 报告逻辑
+"""
+
 import time
 
 from selenium.webdriver.support import expected_conditions as EC
@@ -56,6 +65,12 @@ class WaitMixin:
 
             time.sleep(poll_interval)
 
-    def sleep(self, seconds):
-        self._log.info(f"[SLEEP] {self._page_name} seconds={seconds}")
-        time.sleep(float(seconds))
+    def sleep(self, seconds: float):
+        """
+        强制等待（兜底手段）
+        ⚠️ 不推荐使用，优先使用显式 wait
+        """
+        self._log.warning(
+            f"[SLEEP][FORCED] page={self._page_name} seconds={seconds}"
+        )
+        time.sleep(seconds)

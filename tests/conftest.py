@@ -5,6 +5,7 @@ import pytest
 from framework.core.driver_manager import DriverManager
 from framework.utils.config_loader import load_config
 from framework.utils.locator_loader import LocatorLoader
+from framework.reporting.lifecycle import on_case_finished
 from framework.utils.screenshot import take_screenshot
 
 
@@ -77,8 +78,6 @@ def pytest_runtest_makereport(item, call):
         if not driver:
             return
 
-        screenshot_dir = Path("output/screenshots")
-        case_id = item.nodeid.replace("/", "_").replace("::", "__")
-        path = take_screenshot(driver, str(screenshot_dir), prefix=case_id)
+        path = on_case_finished(item, rep, driver)
 
         setattr(item, "final_screenshot", path)

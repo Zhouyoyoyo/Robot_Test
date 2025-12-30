@@ -13,6 +13,9 @@ class DomMixin:
         self._log.info(f"[OPEN] {self._page_name} -> {url}")
         self.__driver.get(url)
 
+    # NOTE:
+    # This method intentionally does NOT call _before_action().
+    # Hook is reserved for future framework-level orchestration.
     def click(self, name):
         self._log.debug(f"[CLICK] {self._page_name}.{name}")
         self._find(name).click()
