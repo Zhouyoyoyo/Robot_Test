@@ -1,7 +1,22 @@
+"""DOM 交互模块。
+
+DOM interaction module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
 from selenium.webdriver.support.select import Select
 
 
 class DomMixin:
+    """DOM 交互混入类。
+
+    DOM interaction mixin.
+
+    作者: taobo.zhou
+    Author: taobo.zhou
+    """
     def _get_locator(self, name):
         return self._locators.get(name)
 
@@ -13,9 +28,6 @@ class DomMixin:
         self._log.info(f"[OPEN] {self._page_name} -> {url}")
         self.__driver.get(url)
 
-    # NOTE:
-    # This method intentionally does NOT call _before_action().
-    # Hook is reserved for future framework-level orchestration.
     def click(self, name):
         self._log.debug(f"[CLICK] {self._page_name}.{name}")
         self._find(name).click()

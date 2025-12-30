@@ -1,3 +1,11 @@
+"""定位器加载模块。
+
+Locator loader module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
 import os
 
 import yaml
@@ -5,6 +13,13 @@ from selenium.webdriver.common.by import By
 
 
 class LocatorLoader:
+    """定位器加载器。
+
+    Locator loader.
+
+    作者: taobo.zhou
+    Author: taobo.zhou
+    """
     def __init__(self, yaml_path):
         if not os.path.exists(yaml_path):
             raise FileNotFoundError(f"Locator file not found: {yaml_path}")
@@ -12,7 +27,6 @@ class LocatorLoader:
             self.data = yaml.safe_load(f)
 
     def validate_all(self):
-        """只校验结构，不触碰 selenium"""
         if not isinstance(self.data, dict):
             raise ValueError("Locator root must be a dict")
 
@@ -31,6 +45,13 @@ class LocatorLoader:
 
 
 class PageLocators:
+    """页面定位器代理。
+
+    Page locator proxy.
+
+    作者: taobo.zhou
+    Author: taobo.zhou
+    """
     def __init__(self, loader: LocatorLoader, page_name: str):
         self._loader = loader
         self._page_name = page_name

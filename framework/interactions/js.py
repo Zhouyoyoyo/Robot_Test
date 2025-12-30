@@ -1,4 +1,20 @@
+"""JavaScript 交互模块。
+
+JavaScript interaction module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
+
 class JsMixin:
+    """JavaScript 交互混入类。
+
+    JavaScript interaction mixin.
+
+    作者: taobo.zhou
+    Author: taobo.zhou
+    """
     def js_click(self, name):
         self._log.info(f"[JS_CLICK] {self._page_name}.{name}")
         el = self._find(name)

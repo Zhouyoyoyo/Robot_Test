@@ -1,7 +1,22 @@
+"""Shadow DOM 交互模块。
+
+Shadow DOM interaction module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
 from selenium.webdriver.common.by import By
 
 
 class ShadowDomMixin:
+    """Shadow DOM 交互混入类。
+
+    Shadow DOM interaction mixin.
+
+    作者: taobo.zhou
+    Author: taobo.zhou
+    """
     def _get_shadow_host_locator(self, name):
         if hasattr(self._locators, "get_shadow_host"):
             return self._locators.get_shadow_host(name)
@@ -46,9 +61,6 @@ class ShadowDomMixin:
         input_element.send_keys(text)
 
     def click_shadow_dom(self, locator_name: str):
-        # NOTE:
-        # This method intentionally does NOT call _before_action().
-        # Hook is reserved for future framework-level orchestration.
         self._log.info(
             f"Starting the process to upload file in Shadow DOM for locator: {locator_name}"
         )

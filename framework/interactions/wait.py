@@ -1,10 +1,9 @@
-"""
-WaitMixin 职责说明：
+"""等待交互模块。
 
-1. 页面级等待（page ready / dom stable）
-2. 元素级显式等待（visible / clickable / disabled）
-3. 不处理业务语义
-4. 不包含截图 / 报告逻辑
+Wait interaction module.
+
+作者: taobo.zhou
+Author: taobo.zhou
 """
 
 import time
@@ -14,6 +13,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class WaitMixin:
+    """等待交互混入类。
+
+    Wait interaction mixin.
+
+    作者: taobo.zhou
+    Author: taobo.zhou
+    """
     def wait_page_ready(self, timeout=30):
         WebDriverWait(self.__driver, timeout).until(
             lambda d: d.execute_script(
@@ -66,10 +72,6 @@ class WaitMixin:
             time.sleep(poll_interval)
 
     def sleep(self, seconds: float):
-        """
-        强制等待（兜底手段）
-        ⚠️ 不推荐使用，优先使用显式 wait
-        """
         self._log.warning(
             f"[SLEEP][FORCED] page={self._page_name} seconds={seconds}"
         )

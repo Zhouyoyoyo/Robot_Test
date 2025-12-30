@@ -1,14 +1,13 @@
+"""用例生命周期模块。
+
+Case lifecycle module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
+
 def on_case_finished(item, report, driver):
-    """
-    Case lifecycle hook (post-execution)
-
-    Current responsibilities:
-    - take screenshot (success / failure)
-
-    Future:
-    - failure classification
-    - artifact packaging
-    """
     from pathlib import Path
 
     from framework.utils.screenshot import take_screenshot

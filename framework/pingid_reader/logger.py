@@ -1,4 +1,13 @@
+"""PingID 日志模块。
+
+PingID logger module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
 import logging
+
 
 def get_logger():
     logger = logging.getLogger('PINGID')

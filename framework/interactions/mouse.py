@@ -1,10 +1,22 @@
+"""鼠标交互模块。
+
+Mouse interaction module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
 from selenium.webdriver import ActionChains
 
 
 class MouseMixin:
-    # NOTE:
-    # This method intentionally does NOT call _before_action().
-    # Hook is reserved for future framework-level orchestration.
+    """鼠标交互混入类。
+
+    Mouse interaction mixin.
+
+    作者: taobo.zhou
+    Author: taobo.zhou
+    """
     def click(self, name):
         el = self._find(name)
         self._log.info(f"[MOUSE_CLICK] {self._page_name}.{name}")

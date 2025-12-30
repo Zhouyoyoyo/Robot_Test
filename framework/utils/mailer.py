@@ -1,3 +1,11 @@
+"""邮件发送模块。
+
+Mail sender module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
 from __future__ import annotations
 
 import os

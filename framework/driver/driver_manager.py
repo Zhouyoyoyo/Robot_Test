@@ -1,7 +1,22 @@
+"""驱动管理模块。
+
+Driver manager module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
 from framework.driver.driver_factory import create_driver
 
 
 class DriverManager:
+    """驱动管理器。
+
+    Driver manager.
+
+    作者: taobo.zhou
+    Author: taobo.zhou
+    """
     _driver = None
 
     @classmethod

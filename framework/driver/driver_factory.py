@@ -1,3 +1,11 @@
+"""浏览器驱动工厂模块。
+
+Browser driver factory module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.edge.options import Options as EdgeOptions

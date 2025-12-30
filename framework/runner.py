@@ -1,8 +1,14 @@
+"""运行器模块。
+
+Runner module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
 from __future__ import annotations
 from tests.conftest import capture_final_screenshot
 from framework.utils.html_report import build_html_report
-
-"""项目启动入口（run.py 调用）"""
 
 import os
 import time
@@ -23,15 +29,19 @@ from pages.login_page import LoginPage
 from pages.software_container_page import SoftwareContainerPage
 
 
-# =========================================================
-# CaseResult（你原来的定义，保持，只确保构造时字段齐全）
-# =========================================================
 @dataclass
 class CaseResult:
+    """用例结果数据结构。
+
+    Case result data structure.
+
+    作者: taobo.zhou
+    Author: taobo.zhou
+    """
     case_id: str
     sheet: str
     iteration: int
-    status: str  # PASS / FAIL
+    status: str
     seconds: float
     start_time: str
     end_time: str
@@ -59,7 +69,6 @@ def _init_config() -> Dict[str, Any]:
 
 
 def _get_case_url(cfg: Dict[str, Any], sheet_name: str, data: Dict[str, Any]) -> str:
-    """根据 sheet 名从 config.yaml 取 URL。"""
     project = cfg.get("project", {}) or {}
 
     key = f"{sheet_name}"
@@ -140,7 +149,6 @@ def _run_one_case(cfg: Dict[str, Any], sheet: str, iteration: int, data: Dict[st
         log.error(traceback.format_exc())
 
     finally:
-        # ✅ 用例结束必截图：唯一入口在 conftest.py
         if driver is not None:
             screenshot_path = capture_final_screenshot(driver, case_id, cfg)
 
@@ -234,7 +242,6 @@ def run_tests() -> None:
     summary_path = _write_summary(results, out_dir)
     log.info(f"[SUMMARY_FILE] {summary_path}")
 
-    # 邮件通知（HTML 正文）
     try:
         report = build_html_report(results, case_params=sheets)
 
