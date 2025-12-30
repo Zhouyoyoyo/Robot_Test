@@ -17,12 +17,13 @@ def test_automatic_uploading_MBOS(
     base_url,
 ):
     data = case_data
+    url = base_url
 
     username = data["login.username"]
     password = data["login.password"]
 
     page_login = LoginPage(driver, config["locator_loader"])
-    page_login.open(base_url)
+    page_login.open(url)
     page_login.wait_page_ready()
 
     page_login.wait_visible("next_button"), (
