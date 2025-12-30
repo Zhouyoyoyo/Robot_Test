@@ -27,6 +27,20 @@ class AttemptRecord:
     screenshot_path: Optional[str]
 
 
+@dataclass
+class CaseResult:
+    case_id: str
+    sheet: str
+    status: str
+    retried: bool
+    attempt: int
+    error: Optional[str]
+    screenshot: Optional[str]
+    nodeid: str
+    start_time: str
+    end_time: str
+
+
 def _ensure_dir(p: Path) -> None:
     p.mkdir(parents=True, exist_ok=True)
 
@@ -83,6 +97,15 @@ def _get_attempt(config, nodeid: str) -> int:
 def _inc_attempt(config, nodeid: str) -> int:
     config._pw_attempts[nodeid] = int(config._pw_attempts.get(nodeid, 0)) + 1
     return int(config._pw_attempts[nodeid])
+
+
+def _is_assertion_failure(rep) -> bool:
+    try:
+        if isinstance(rep.longrepr, AssertionError):
+            return True
+    except Exception:
+        pass
+    return "AssertionError" in str(rep.longrepr)
 
 
 def pytest_addoption(parser):
@@ -164,11 +187,24 @@ def pytest_runtest_makereport(item, call):
     # 保存 sheet_name 到 item 供后续使用
     item._pw_sheet_name = sheet_name
 
+    # setup 阶段：重置状态，避免重跑时污染
+    if rep.when == "setup":
+        item._pw_error = False
+        item._pw_error_longrepr = None
+        item._pw_call_outcome = None
+        item._pw_call_longrepr = None
+
     # call 阶段：确定验证失败/通过/跳过
     if rep.when == "call":
         if rep.failed:
-            item._pw_call_outcome = "FAILED"  # 验证失败（assert）
-            item._pw_call_longrepr = str(rep.longrepr)
+            if _is_assertion_failure(rep):
+                item._pw_call_outcome = "FAILED"  # 验证失败（assert）
+                item._pw_call_longrepr = str(rep.longrepr)
+            else:
+                item._pw_call_outcome = "ERROR"  # 非验证失败（异常）
+                item._pw_call_longrepr = str(rep.longrepr)
+                item._pw_error = True
+                item._pw_error_longrepr = str(rep.longrepr)
         elif rep.passed:
             item._pw_call_outcome = "PASSED"
             item._pw_call_longrepr = None
@@ -198,13 +234,24 @@ def pytest_runtest_makereport(item, call):
         if driver is not None:
             ss_path = _take_screenshot(driver, ss_dir, sheet_name, attempt)
 
-        # 计算本轮最终 outcome：优先 ERROR，其次 call 阶段结果
+        # 计算本轮最终 outcome：优先 ERROR，其次 FAILED，再 PASSED，最后 SKIPPED
         if getattr(item, "_pw_error", False):
             outc = "ERROR"
             lr = getattr(item, "_pw_error_longrepr", None)
         else:
-            outc = getattr(item, "_pw_call_outcome", "PASSED")
-            lr = getattr(item, "_pw_call_longrepr", None)
+            call_outc = getattr(item, "_pw_call_outcome", None)
+            if call_outc == "FAILED":
+                outc = "FAILED"
+                lr = getattr(item, "_pw_call_longrepr", None)
+            elif call_outc == "PASSED":
+                outc = "PASSED"
+                lr = None
+            elif call_outc == "SKIPPED":
+                outc = "SKIPPED"
+                lr = getattr(item, "_pw_call_longrepr", None)
+            else:
+                outc = "PASSED"
+                lr = None
 
         ar = AttemptRecord(
             nodeid=nodeid,
@@ -287,30 +334,33 @@ def pytest_sessionfinish(session, exitstatus):
     # 其中 results 期望是一个列表，每个元素至少包含：
     # - name / nodeid / outcome / error 等（你现有实现会读取哪些字段）
     # 为避免破坏，你这里按最稳的通用字段输出：
-    results = []
+    results: List[CaseResult] = []
     case_params = {}
 
     for nodeid, (outc, attempt, lr, ss, sheet_name) in session.config._pw_final.items():
-        results.append({
-            "nodeid": nodeid,
-            "name": nodeid,
-            "sheet_name": sheet_name,
-            "outcome": outc,
-            "attempts": attempt,
-            "error": lr,
-            "screenshot": ss,
-        })
+        results.append(CaseResult(
+            case_id=sheet_name,
+            sheet=sheet_name,
+            status=outc,
+            retried=(attempt > 1),
+            attempt=attempt,
+            error=lr,
+            screenshot=ss,
+            nodeid=nodeid,
+            start_time="-",
+            end_time="-",
+        ))
         # case_params 用于报告里展示参数；至少放 sheet_name 与 url 映射键
-        case_params[nodeid] = {
+        case_params[sheet_name] = {
             "sheet_name": sheet_name,
         }
 
     # 统计
     total = len(results)
-    passed = sum(1 for r in results if r["outcome"] == "PASSED")
-    failed = sum(1 for r in results if r["outcome"] == "FAILED")
-    error = sum(1 for r in results if r["outcome"] == "ERROR")
-    skipped = sum(1 for r in results if r["outcome"] == "SKIPPED")
+    passed = sum(1 for r in results if r.status == "PASSED")
+    failed = sum(1 for r in results if r.status == "FAILED")
+    error = sum(1 for r in results if r.status == "ERROR")
+    skipped = sum(1 for r in results if r.status == "SKIPPED")
 
     # 2) 生成 HTML 报告（复用现有实现）
     report_info = build_html_report(results, case_params)
