@@ -3,14 +3,13 @@ from __future__ import annotations
 import os
 import smtplib
 import traceback
-from typing import Iterable, Dict, Optional
+from email import encoders
+from email.header import Header
+from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.image import MIMEImage
-from email.mime.base import MIMEBase
-from email.header import Header
 from email.utils import formataddr
-from email import encoders
+from typing import Any, Iterable, Mapping
 
 from framework.utils.config_loader import load_config
 from framework.utils.logger import get_logger
@@ -18,22 +17,34 @@ from framework.utils.logger import get_logger
 log = get_logger()
 
 
-def send_html_mail(
-    subject: str,
-    html_body: str,
-    *,
-    inline_images: Optional[Dict[str, str]] = None,
-    attachments: Optional[Iterable[str]] = None,
-) -> bool:
-    """
-    发送 HTML 邮件（支持 CID 内嵌图片）
+def _render_summary(pytest_results: Mapping[str, Any] | None) -> str:
+    if not pytest_results:
+        return "<p>No pytest results provided.</p>"
 
-    参数：
-        subject        : 邮件主题
-        html_body     : HTML 字符串
-        inline_images : cid -> image_path
-        attachments   : 其他附件路径
-    """
+    parts: list[str] = ["<ul>"]
+    for key, value in pytest_results.items():
+        parts.append(f"<li><strong>{key}</strong>: {value}</li>")
+    parts.append("</ul>")
+    return "\n".join(parts)
+
+
+def _load_html_report(html_report: str | None) -> str:
+    if not html_report:
+        return "<p>No HTML report attached.</p>"
+    if os.path.exists(html_report):
+        with open(html_report, "r", encoding="utf-8") as fh:
+            return fh.read()
+    return html_report
+
+
+def send_report(
+    pytest_results: Mapping[str, Any] | None,
+    html_report: str | None,
+    screenshot_zip: str | None,
+    *,
+    subject: str = "Robot BTV 自动化测试报告",
+    extra_attachments: Iterable[str] | None = None,
+) -> bool:
     cfg = load_config()
     mail_cfg = cfg.get("mail", {})
 
@@ -55,64 +66,43 @@ def send_html_mail(
 
     alt = MIMEMultipart("alternative")
     msg.attach(alt)
-    alt.attach(MIMEText(html_body, "html", "utf-8"))
 
-    # 记录 inline 图片路径，用于 attachments 去重
-    inline_paths = set(inline_images.values()) if inline_images else set()
+    html_body = _load_html_report(html_report)
+    summary_block = _render_summary(pytest_results)
+    full_body = f"""
+    <html>
+      <body>
+        <h3>Pytest Summary</h3>
+        {summary_block}
+        <hr />
+        {html_body}
+      </body>
+    </html>
+    """
+    alt.attach(MIMEText(full_body, "html", "utf-8"))
 
+    attachments = list(extra_attachments or [])
+    if screenshot_zip:
+        attachments.append(screenshot_zip)
 
-    # ===== CID 图片（作为“附件”发送，但带 Content-ID）=====
-    if inline_images:
-        for cid, path in inline_images.items():
-            if not path or not os.path.exists(path):
-                log.warning(f"[MAIL] inline image not found: cid={cid} path={path}")
-                continue
+    for path in attachments:
+        if not path or not os.path.exists(path):
+            log.warning(f"[MAIL] attachment not found: {path}")
+            continue
+        part = MIMEBase("application", "octet-stream")
+        try:
+            with open(path, "rb") as fh:
+                part.set_payload(fh.read())
+        except Exception:
+            log.warning(f"[MAIL] read attachment failed: {path}")
+            continue
 
-            try:
-                with open(path, "rb") as f:
-                    img = MIMEImage(f.read())
-            except Exception:
-                log.warning(f"[MAIL] read inline image failed: {path}")
-                continue
-
-            # 关键：让 HTML 里可通过 cid:xxx 引用到它
-            img.add_header("Content-ID", f"<{cid}>")
-
-            # 关键：让它在邮件客户端显示为“附件”，而不是 inline 资源
-            img.add_header(
-                "Content-Disposition",
-                "attachment",
-                filename=os.path.basename(path),
-            )
-
-            msg.attach(img)
-
-        # ===== 普通附件（跳过已作为 CID part 发送的图片）=====
-        if attachments:
-            for path in attachments:
-                if not path:
-                    continue
-                if path in inline_paths:
-                    # 已经作为 CID 图片 part 发过了，避免重复附件
-                    continue
-                if not os.path.exists(path):
-                    log.warning(f"[MAIL] attachment not found: {path}")
-                    continue
-
-                part = MIMEBase("application", "octet-stream")
-                try:
-                    with open(path, "rb") as f:
-                        part.set_payload(f.read())
-                except Exception:
-                    log.warning(f"[MAIL] read attachment failed: {path}")
-                    continue
-
-                encoders.encode_base64(part)
-                part.add_header(
-                    "Content-Disposition",
-                    f'attachment; filename="{os.path.basename(path)}"',
-                )
-                msg.attach(part)
+        encoders.encode_base64(part)
+        part.add_header(
+            "Content-Disposition",
+            f'attachment; filename="{os.path.basename(path)}"',
+        )
+        msg.attach(part)
 
     try:
         server = smtplib.SMTP_SSL(
@@ -123,7 +113,7 @@ def send_html_mail(
         server.login(auth_cfg["username"], auth_cfg["password"])
         server.sendmail(sender_cfg["address"], receivers, msg.as_string())
         server.quit()
-        log.info("[MAIL] html report sent")
+        log.info("[MAIL] report sent")
         return True
     except Exception:
         log.error("[MAIL] send failed")

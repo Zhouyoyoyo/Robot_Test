@@ -18,7 +18,7 @@ from framework.utils.config_loader import load_config, PROJECT_ROOT
 from framework.utils.excel_loader import load_excel_sheets_kv
 from framework.utils.locator_loader import LocatorLoader
 from framework.utils.logger import get_logger, set_current_test
-from framework.utils.mailer import send_html_mail
+from framework.utils.mailer import send_report
 from pages.login_page import LoginPage
 from pages.software_container_page import SoftwareContainerPage
 
@@ -238,11 +238,17 @@ def run_tests() -> None:
     try:
         report = build_html_report(results, case_params=sheets)
 
-        send_html_mail(
+        summary = {
+            "total": len(results),
+            "passed": passed,
+            "failed": failed,
+        }
+        send_report(
+            summary,
+            report["html"],
+            screenshot_zip=None,
             subject="Robot BTV 自动化测试报告",
-            html_body=report["html"],
-            inline_images=report["inline_images"],
-            attachments=report["attachments"],
+            extra_attachments=report["attachments"],
         )
     except Exception as e:
         log.warning(f"Send mail failed: {e}")
