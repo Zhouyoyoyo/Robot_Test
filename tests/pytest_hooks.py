@@ -99,13 +99,29 @@ def _inc_attempt(config, nodeid: str) -> int:
     return int(config._pw_attempts[nodeid])
 
 
-def _is_assertion_failure(rep) -> bool:
+def _is_assertion_failure(call):
+    """
+    判断是否为“验证失败（AssertionError）”
+    规则：
+    1️⃣ 优先通过异常类型判断（最可靠）
+    2️⃣ 若拿不到 excinfo，再退化为字符串兜底
+    """
     try:
-        if isinstance(rep.longrepr, AssertionError):
+        excinfo = getattr(call, "excinfo", None)
+        if excinfo and isinstance(excinfo.value, AssertionError):
             return True
     except Exception:
         pass
-    return "AssertionError" in str(rep.longrepr)
+
+    # 兜底：pytest 断言重写有时不直接暴露 AssertionError
+    try:
+        text = str(getattr(call, "longrepr", ""))
+        if "assert " in text or "AssertionError" in text:
+            return True
+    except Exception:
+        pass
+
+    return False
 
 
 def pytest_addoption(parser):
@@ -197,7 +213,7 @@ def pytest_runtest_makereport(item, call):
     # call 阶段：确定验证失败/通过/跳过
     if rep.when == "call":
         if rep.failed:
-            if _is_assertion_failure(rep):
+            if _is_assertion_failure(call):
                 item._pw_call_outcome = "FAILED"  # 验证失败（assert）
                 item._pw_call_longrepr = str(rep.longrepr)
             else:
