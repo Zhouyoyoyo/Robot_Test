@@ -1,3 +1,11 @@
+"""核心页面基类模块。
+
+Core base page module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
 from framework.interactions.dom import DomMixin
 from framework.interactions.wait import WaitMixin
 from framework.interactions.js import JsMixin
@@ -13,6 +21,13 @@ class BasePage(
     MouseMixin,
     ShadowDomMixin,
 ):
+    """页面基类。
+
+    Base page class.
+
+    作者: taobo.zhou
+    Author: taobo.zhou
+    """
     def __init__(self, driver, locator_loader, page_name=None):
         self.__driver = driver
         self._locators = build_page_locators(locator_loader, page_name)
@@ -30,12 +45,4 @@ class BasePage(
             setattr(self, f"_{mixin.__name__}__driver", driver)
 
     def _before_action(self, action: str, target: str | None = None):
-        """
-        Action hook (reserved)
-
-        用于未来统一：
-        - wait_page_ready
-        - wait_dom_stable
-        - tracing / metrics
-        """
         pass

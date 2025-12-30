@@ -1,14 +1,27 @@
+"""登录页面模块。
+
+Login page module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
 from framework.base_page import BasePage
 from framework.pingid_reader import PingIDOtpManager
 
 
 class LoginPage(BasePage):
+    """登录页面对象。
+
+    Login page object.
+
+    作者: taobo.zhou
+    Author: taobo.zhou
+    """
     def __init__(self, driver, locator_loader):
         super().__init__(driver, locator_loader, page_name="LoginPage")
 
     def login(self, username: str, password: str):
-        # 对齐 locators/locator.yaml 的 key
-        # 多步骤登录页：每一步都显式等待对应控件出现，避免“页面未就绪就操作”导致定位/点击失败
         self.wait_visible("username_input"), "username_input 未出现"
         self.input("username_input", username)
         self.click("next_button")
@@ -24,8 +37,6 @@ class LoginPage(BasePage):
         self.wait_page_ready()
         self.wait_visible("ping_id_input"), "pingID 未出现"
 
-        # ✅ PingID 多线程互斥：同一时间只允许一个用例拿 OTP
-        # 且“用完就关”，避免窗口/剪贴板状态污染下一个用例
         with ping_id_manager.exclusive(shutdown_after=True):
             ping_id = ping_id_manager.copy_otp()
             self.input("ping_id_input", ping_id)

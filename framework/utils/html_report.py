@@ -1,3 +1,11 @@
+"""HTML 报告构建模块。
+
+HTML report builder module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -11,32 +19,6 @@ def build_html_report(
     results: List[Any],
     case_params: Dict[str, Dict[str, Any]],
 ) -> Dict[str, Any]:
-    """
-    构建 HTML 邮件报告（不落地文件）
-
-    参数：
-        results:
-            List[CaseResult]
-            CaseResult 至少包含：
-              - case_id
-              - sheet
-              - iteration
-              - status
-              - seconds
-              - error
-              - screenshot (str | None)
-
-        case_params:
-            sheet_name -> excel kv dict
-
-    返回：
-        {
-          "html": str,                  # 邮件 HTML 正文
-          "inline_images": {cid: path}, # cid -> 本地图片路径
-          "attachments": [path, ...],   # 所有图片路径（兜底）
-        }
-    """
-
     inline_images: Dict[str, str] = {}
     attachments: List[str] = []
 
@@ -65,10 +47,8 @@ def build_html_report(
             for k, v in params.items()
         )
 
-        # ===== 截图处理 =====
         screenshots_html = ""
         if r.screenshot and os.path.exists(r.screenshot):
-            # 给每张截图一个 CID，用于邮件内链接
             cid = f"img_{uuid.uuid4().hex}@report"
             inline_images[cid] = r.screenshot
             attachments.append(r.screenshot)
@@ -78,7 +58,6 @@ def build_html_report(
         else:
             screenshots_html = "<div class='muted'>⚠ 截图缺失</div>"
 
-        # ===== 失败日志 =====
         error_html = (
             f"<pre>{escape(r.error)}</pre>"
             if r.error

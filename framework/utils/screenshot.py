@@ -1,5 +1,14 @@
+"""截图工具模块。
+
+Screenshot utility module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
 import os
 from datetime import datetime
+
 
 def take_screenshot(driver, folder: str, prefix: str = "case") -> str:
     os.makedirs(folder, exist_ok=True)

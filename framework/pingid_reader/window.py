@@ -1,3 +1,11 @@
+"""PingID 窗口操作模块。
+
+PingID window operations module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
 import time
 import psutil
 import win32gui
@@ -12,9 +20,6 @@ log = get_logger()
 
 
 def find_pingid_hwnd(window_title_keyword: str) -> int | None:
-    """
-    根据窗口标题关键字 + 进程名 查找 PingID 窗口句柄
-    """
     result = None
 
     def enum_handler(hwnd, _):
@@ -46,9 +51,6 @@ def wait_for_pingid_window(
     timeout: float,
     poll_interval: float = 0.25,
 ) -> int:
-    """
-    等待 PingID 窗口出现
-    """
     end_time = time.time() + timeout
 
     while time.time() < end_time:
@@ -70,9 +72,6 @@ def normalize_pingid_window(
     min_width: int,
     min_height: int,
 ):
-    """
-    将 PingID 窗口拉到前台并保证最小尺寸
-    """
     win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
 
     try:
@@ -106,15 +105,10 @@ def normalize_pingid_window(
 
 
 def click_copy_button(hwnd: int):
-    """
-    点击 PingID 窗口右下角的【复制】按钮
-    （基于窗口相对比例）
-    """
     left, top, right, bottom = win32gui.GetWindowRect(hwnd)
     width = right - left
     height = bottom - top
 
-    # ⚠️ 经验比例：右下角复制按钮
     x = left + int(width * 0.72)
     y = top + int(height * 0.78)
 

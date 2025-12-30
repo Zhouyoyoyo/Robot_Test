@@ -1,3 +1,11 @@
+"""PingID OTP 管理模块。
+
+PingID OTP manager module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
 import threading
 from contextlib import contextmanager
 import time
@@ -20,29 +28,27 @@ log = get_logger()
 
 
 class PingIDOtpManager:
-    """
-    PingID OTP Manager
-    - 单实例
-    - 所有配置来源于 config.yaml
-    - 支持 copy_otp / shutdown
+    """PingID OTP 管理器。
+
+    PingID OTP manager.
+
+    作者: taobo.zhou
+    Author: taobo.zhou
     """
     _instance = None
     _lock = threading.Lock()
-    # ✅ 全局互斥：多线程并发跑用例时，PingID 只能单实例串行使用
     _use_lock = threading.Lock()
 
     def __init__(self):
         self._ready = False
         self._hwnd = None
 
-        # ===== 统一加载项目配置 =====
         cfg = load_config()
         pingid_cfg = cfg.get("pingid", {})
 
         self.exe_path = Path(pingid_cfg.get("exe_path", ""))
         self.window_title_keyword = pingid_cfg.get("window_title_keyword", "PingID")
 
-        # ✅ 新增：是否每次首次初始化前清理残留 pingid.exe
         self.clean_start = pingid_cfg.get("clean_start", True)
 
         window_cfg = pingid_cfg.get("window", {})
@@ -61,17 +67,14 @@ class PingIDOtpManager:
             return cls._instance
 
     def ensure_ready(self):
-        # 已就绪则直接返回
         if self._ready and self._hwnd:
             return
 
         log.info("Ensuring PingID is ready")
 
-        # ✅ 关键改动：第一次准备前先清理残留 pingid 进程（可配置关闭）
         if self.clean_start:
             self._kill_existing_pingid_processes()
 
-        # 重新判断并启动
         if not self._is_pingid_running():
             self._start_pingid()
 
@@ -90,12 +93,8 @@ class PingIDOtpManager:
         log.info("PingID ready")
 
     def shutdown(self):
-        """
-        关闭 PingID 并重置状态
-        """
         log.info("[PingID] shutdown")
 
-        # 1. 尝试关闭 PingID 进程
         try:
             for proc in psutil.process_iter(attrs=["name"]):
                 if proc.info["name"] and proc.info["name"].lower() == "pingid.exe":
@@ -103,7 +102,6 @@ class PingIDOtpManager:
         except Exception as e:
             log.warning(f"[PingID] shutdown kill failed: {e}")
 
-        # 2. 重置状态
         self._ready = False
         self._hwnd = None
 
@@ -118,7 +116,6 @@ class PingIDOtpManager:
         return False
 
     def _kill_existing_pingid_processes(self):
-        """清理残留 PingID.exe，避免句柄/窗口/剪贴板状态污染"""
         killed_pids = []
         for proc in psutil.process_iter(attrs=["pid", "name"]):
             try:
@@ -132,7 +129,7 @@ class PingIDOtpManager:
 
         if killed_pids:
             log.warning(f"PingID residual processes killed: {killed_pids}")
-            time.sleep(1.5)  # 等待窗口句柄彻底释放
+            time.sleep(1.5)
 
     def _start_pingid(self):
         if not self.exe_path or not self.exe_path.exists():
@@ -142,13 +139,6 @@ class PingIDOtpManager:
         subprocess.Popen([str(self.exe_path)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     def copy_otp(self) -> str:
-        """
-        复制 OTP：
-        1) 确保窗口 ready
-        2) 清空剪贴板
-        3) 点击 copy
-        4) 从剪贴板读取 OTP
-        """
         self.ensure_ready()
 
         clear_clipboard()
@@ -162,20 +152,6 @@ class PingIDOtpManager:
 
     @contextmanager
     def exclusive(self, shutdown_after: bool = True):
-        """PingID 串行使用上下文
-
-        需求：多线程并发跑时，PingID 只能同时被一个用例使用。
-        且“一个用完 pingid 关掉，下一个再用”。
-
-        用法：
-            mgr = PingIDOtpManager.get()
-            with mgr.exclusive():
-                otp = mgr.copy_otp()
-                ...
-
-        参数：
-            shutdown_after: 退出上下文后是否自动 shutdown PingID（默认 True）。
-        """
         PingIDOtpManager._use_lock.acquire()
         try:
             yield self

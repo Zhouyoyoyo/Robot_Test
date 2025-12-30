@@ -1,7 +1,22 @@
+"""软件容器页面模块。
+
+Software container page module.
+
+作者: taobo.zhou
+Author: taobo.zhou
+"""
+
 from framework.base_page import BasePage
 
 
 class SoftwareContainerPage(BasePage):
+    """软件容器页面对象。
+
+    Software container page object.
+
+    作者: taobo.zhou
+    Author: taobo.zhou
+    """
     def __init__(self, driver, locator_loader):
         super().__init__(driver, locator_loader, page_name="SoftwareContainerPage")
 
@@ -15,7 +30,6 @@ class SoftwareContainerPage(BasePage):
                        file_upload_ODX_F: str,
                        file_upload_flashware: str,
                        ):
-        # 对齐 locators/locator.yaml 的 key
         self.wait_visible("create_version_button",45)
         self.click("create_version_button")
 
@@ -53,7 +67,6 @@ class SoftwareContainerPage(BasePage):
         self.mouse_click("version_confirm_button")
 
         self.wait_visible("succeeded",60*5)
-
 
 
 

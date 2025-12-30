@@ -1,8 +1,9 @@
-"""
-DEPRECATED MODULE
+"""已废弃的基础页面模块。
 
-This file is intentionally frozen to prevent accidental usage.
-Use `framework.core.base_page.BasePage` instead.
+Deprecated base page module.
+
+作者: taobo.zhou
+Author: taobo.zhou
 """
 
 raise RuntimeError(
