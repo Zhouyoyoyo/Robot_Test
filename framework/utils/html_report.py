@@ -63,6 +63,10 @@ def build_html_report(
             else "<div class='muted'>无失败日志</div>"
         )
 
+        display_status = r.status
+        if r.status == "PASS" and r.retried:
+            display_status = "PASS (after retry)"
+
         rows_html.append(
             f"""
 <tr>
@@ -86,7 +90,7 @@ def build_html_report(
 
   <td>
     <span class="status {r.status}">
-      ● {r.status}
+      ● {escape(display_status)}
     </span>
   </td>
 
@@ -159,7 +163,7 @@ pre {{
   <th>开始时间</th>
   <th>结束时间</th>
   <th>Attempt</th>
-  <th>Retried</th>
+  <th>Retry</th>
   <th>结果</th>
   <th>备注</th>
 </tr>
