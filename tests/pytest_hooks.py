@@ -1,5 +1,7 @@
+import json
 import os
 import re
+import shutil
 import time
 import zipfile
 from dataclasses import dataclass
@@ -7,6 +9,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import pytest
+import yaml
 
 from framework.utils.config_loader import load_config
 from framework.utils.logger import get_logger
@@ -124,9 +127,42 @@ def _is_assertion_failure(call):
     return False
 
 
+def _should_retry_error(longrepr: Optional[str], policy: dict) -> bool:
+    if not longrepr:
+        return False
+
+    text = str(longrepr)
+    text_lower = text.lower()
+    non_retryable = policy.get("non_retryable_keywords") or []
+    for kw in non_retryable:
+        if kw and str(kw).lower() in text_lower:
+            return False
+
+    retryable = policy.get("retryable_keywords") or []
+    if not retryable:
+        return True
+
+    for kw in retryable:
+        if kw and str(kw).lower() in text_lower:
+            return True
+
+    return False
+
+
+def _normalize_status(outc: str) -> str:
+    mapping = {
+        "PASSED": "PASS",
+        "FAILED": "FAIL",
+        "ERROR": "ERROR",
+        "SKIPPED": "SKIP",
+    }
+    return mapping.get(outc, outc)
+
+
 def pytest_addoption(parser):
-    # 可通过环境变量或命令行覆盖（但默认值必须满足需求：只对验证失败重跑）
-    parser.addoption("--pw-reruns", action="store", default=None, help="验证失败重跑次数（默认读取配置或为 1）")
+    parser.addoption("--pw-sheet", action="store", default=None, help="仅运行指定 sheet")
+    parser.addoption("--pw-worker", action="store_true", help="标记当前进程为 worker")
+    parser.addoption("--pw-run-dir", action="store", default=None, help="指定当前进程输出目录")
 
 
 def pytest_configure(config):
@@ -143,43 +179,43 @@ def pytest_configure(config):
     # value: (outcome, attempt, longrepr, screenshot_path, sheet_name)
     config._pw_final: Dict[str, Tuple[str, int, Optional[str], Optional[str], str]] = {}
 
-    # nodeid -> 是否允许继续重跑（只允许 FAILED）
+    # nodeid -> 是否允许继续重跑（只允许 ERROR）
     config._pw_rerun_left: Dict[str, int] = {}
 
-    # 读取重跑次数：优先命令行，其次 retry_policy.yaml（如存在字段），否则默认 1
-    reruns_cli = config.getoption("--pw-reruns")
-    reruns = None
-    if reruns_cli is not None:
+    run_dir_opt = config.getoption("--pw-run-dir") or os.environ.get("PW_RUN_DIR")
+    if run_dir_opt:
+        run_dir = Path(run_dir_opt)
+        ss_dir = run_dir / "screenshots"
+        rep_dir = run_dir / "reports"
+        cfg.setdefault("paths", {})
+        cfg["paths"]["screenshots"] = str(ss_dir)
+        cfg["paths"]["reports"] = str(rep_dir)
+        _ensure_dir(ss_dir)
+        _ensure_dir(rep_dir)
+        if ss_dir.exists():
+            shutil.rmtree(ss_dir)
+            ss_dir.mkdir(parents=True, exist_ok=True)
+
+    rp_path = Path("config") / "retry_policy.yaml"
+    retry_cfg = {}
+    if rp_path.exists():
         try:
-            reruns = int(reruns_cli)
+            with rp_path.open("r", encoding="utf-8") as f:
+                retry_cfg = yaml.safe_load(f) or {}
         except Exception:
-            reruns = None
+            retry_cfg = {}
 
-    if reruns is None:
-        # 尝试从 config/retry_policy.yaml 中读 max_reruns（若没有则默认1）
-        # 注意：本工程已有 RetryPolicy 类但可能被删/不稳定，这里用最稳妥方式：只读 YAML 原文 key。
-        max_reruns = 1
-        try:
-            import yaml  # pyyaml
-            rp_path = Path("config") / "retry_policy.yaml"
-            if rp_path.exists():
-                with open(rp_path, "r", encoding="utf-8") as f:
-                    data = yaml.safe_load(f) or {}
-                # 允许你已有字段名为 max_reruns 或 reruns，择其一；都不存在则1
-                if isinstance(data, dict):
-                    if isinstance(data.get("max_reruns"), int):
-                        max_reruns = int(data["max_reruns"])
-                    elif isinstance(data.get("reruns"), int):
-                        max_reruns = int(data["reruns"])
-        except Exception:
-            max_reruns = 1
-        reruns = max(0, int(max_reruns))
+    retry_section = retry_cfg.get("retry", {}) if isinstance(retry_cfg, dict) else {}
+    max_retry = int(retry_section.get("max_retry", 1))
+    policy = {
+        "max_retry": max_retry,
+        "non_retryable_keywords": retry_section.get("non_retryable_keywords") or [],
+        "retryable_keywords": retry_section.get("retryable_keywords") or [],
+    }
+    config._pw_retry_policy = policy
+    config._pw_default_reruns = max(0, int(max_retry))
 
-    # 强制：至少 1（你需求是要重跑）
-    # 但允许你临时调试设置为0
-    config._pw_default_reruns = int(reruns)
-
-    log.info(f"[PW] default reruns for validation failures = {config._pw_default_reruns}")
+    log.info(f"[PW] default reruns for error failures = {config._pw_default_reruns}")
 
 
 @pytest.hookimpl(hookwrapper=True)
@@ -285,20 +321,24 @@ def pytest_runtest_makereport(item, call):
         # - 若本轮 FAILED/ERROR：最终态=该状态（若之后仍有重跑，最终会被后续覆盖）
         item.config._pw_final[nodeid] = (outc, attempt, lr, ss_path, sheet_name)
 
-        # 若本轮为 FAILED（验证失败），初始化/更新可重跑次数
-        if outc == "FAILED":
+        # 若本轮为 ERROR（非断言异常），按策略初始化/更新可重跑次数
+        if outc == "ERROR":
             left = item.config._pw_rerun_left.get(nodeid)
             if left is None:
-                item.config._pw_rerun_left[nodeid] = int(item.config._pw_default_reruns)
+                policy = item.config._pw_retry_policy
+                if _should_retry_error(lr, policy):
+                    item.config._pw_rerun_left[nodeid] = int(item.config._pw_default_reruns)
+                else:
+                    item.config._pw_rerun_left[nodeid] = 0
         else:
-            # PASSED/ERROR/SKIPPED：不需要重跑
+            # PASSED/FAILED/SKIPPED：不需要重跑
             item.config._pw_rerun_left[nodeid] = 0
 
 
 def pytest_runtestloop(session):
     """
-    实现：仅对 FAILED（验证失败）重跑，ERROR 不重跑。
-    方法：在同一进程中循环执行 items；若某 item FAILED 且仍有 rerun_left，则再次执行它。
+    实现：仅对 ERROR（非断言异常）重跑，FAILED 不重跑。
+    方法：在同一进程中循环执行 items；若某 item ERROR 且仍有 rerun_left，则再次执行它。
     注意：再次执行使用同一个 item，因此天然绑定 sheet_name / data / url（满足“失败重跑用原数据”）。
     """
     config = session.config
@@ -319,10 +359,16 @@ def pytest_runtestloop(session):
         outc, attempt, lr, ss, sheet = final
         left = int(config._pw_rerun_left.get(nodeid, 0))
 
-        # 仅 FAILED 才重跑；ERROR 不重跑；PASSED 不重跑
-        if outc == "FAILED" and left > 0:
+        # 仅 ERROR 才重跑；FAILED 不重跑；PASSED 不重跑
+        if outc == "ERROR" and left > 0:
             config._pw_rerun_left[nodeid] = left - 1
-            log.warning(f"[PW][RERUN] {nodeid} sheet={sheet} attempt={attempt} -> rerun, left={left-1}")
+            log.warning(
+                "[PW][RERUN] nodeid=%s sheet=%s attempt=%s -> rerun, left=%s",
+                nodeid,
+                sheet,
+                attempt,
+                left - 1,
+            )
             # 不推进 i，立即再次执行同一个 item
             continue
 
@@ -351,13 +397,15 @@ def pytest_sessionfinish(session, exitstatus):
     # - name / nodeid / outcome / error 等（你现有实现会读取哪些字段）
     # 为避免破坏，你这里按最稳的通用字段输出：
     results: List[CaseResult] = []
-    case_params = {}
+    case_params: Dict[str, Dict[str, str]] = {}
+    results_payload: List[Dict[str, object]] = []
 
     for nodeid, (outc, attempt, lr, ss, sheet_name) in session.config._pw_final.items():
+        status = _normalize_status(outc)
         results.append(CaseResult(
             case_id=sheet_name,
             sheet=sheet_name,
-            status=outc,
+            status=status,
             retried=(attempt > 1),
             attempt=attempt,
             error=lr,
@@ -366,6 +414,18 @@ def pytest_sessionfinish(session, exitstatus):
             start_time="-",
             end_time="-",
         ))
+        results_payload.append({
+            "case_id": sheet_name,
+            "sheet": sheet_name,
+            "status": status,
+            "retried": attempt > 1,
+            "attempt": attempt,
+            "error": lr,
+            "screenshot": ss,
+            "nodeid": nodeid,
+            "start_time": "-",
+            "end_time": "-",
+        })
         # case_params 用于报告里展示参数；至少放 sheet_name 与 url 映射键
         case_params[sheet_name] = {
             "sheet_name": sheet_name,
@@ -373,10 +433,31 @@ def pytest_sessionfinish(session, exitstatus):
 
     # 统计
     total = len(results)
-    passed = sum(1 for r in results if r.status == "PASSED")
-    failed = sum(1 for r in results if r.status == "FAILED")
+    passed = sum(1 for r in results if r.status == "PASS")
+    failed = sum(1 for r in results if r.status == "FAIL")
     error = sum(1 for r in results if r.status == "ERROR")
-    skipped = sum(1 for r in results if r.status == "SKIPPED")
+    skipped = sum(1 for r in results if r.status == "SKIP")
+
+    results_json = {
+        "sheet": session.config.getoption("--pw-sheet") or "unknown",
+        "counts": {
+            "total": total,
+            "passed": passed,
+            "failed": failed,
+            "error": error,
+            "skipped": skipped,
+        },
+        "results": results_payload,
+        "case_params": case_params,
+    }
+    results_path = out_dir / "results.json"
+    with results_path.open("w", encoding="utf-8") as f:
+        json.dump(results_json, f, ensure_ascii=False, indent=2)
+
+    worker_mode = bool(session.config.getoption("--pw-worker")) or os.environ.get("PW_WORKER") == "1"
+    if worker_mode:
+        log.info("[PW][WORKER] results written: %s", results_path)
+        return
 
     # 2) 生成 HTML 报告（复用现有实现）
     report_info = build_html_report(results, case_params)
@@ -402,7 +483,7 @@ def pytest_sessionfinish(session, exitstatus):
             "failed": failed,
             "error": error,
             "skipped": skipped,
-            "details": results,
+            "details": results_payload,
         },
         html_report=str(report_path),
         screenshot_zip=screenshot_zip,
