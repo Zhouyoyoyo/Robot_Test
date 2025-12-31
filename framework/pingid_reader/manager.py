@@ -15,6 +15,7 @@ import psutil
 from pathlib import Path
 
 from framework.utils.config_loader import load_config
+from .global_lock import pingid_global_lock
 from .window import (
     wait_for_pingid_window,
     normalize_pingid_window,
@@ -150,12 +151,13 @@ class PingIDOtpManager:
 
     @contextmanager
     def exclusive(self, shutdown_after: bool = True):
-        PingIDOtpManager._use_lock.acquire()
-        try:
-            yield self
-        finally:
+        with pingid_global_lock():
+            PingIDOtpManager._use_lock.acquire()
             try:
-                if shutdown_after:
-                    self.shutdown()
+                yield self
             finally:
-                PingIDOtpManager._use_lock.release()
+                try:
+                    if shutdown_after:
+                        self.shutdown()
+                finally:
+                    PingIDOtpManager._use_lock.release()

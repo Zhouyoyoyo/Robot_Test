@@ -82,6 +82,12 @@ def pytest_generate_tests(metafunc):
     if not sheet_names:
         raise RuntimeError("Excel 中至少必须存在一个 sheet")
 
+    selected_sheet = metafunc.config.getoption("--pw-sheet")
+    if selected_sheet:
+        if selected_sheet not in sheet_names:
+            raise RuntimeError(f"指定的 sheet 不存在: {selected_sheet}")
+        sheet_names = [selected_sheet]
+
     metafunc.parametrize(
         "sheet_name",
         sheet_names,
