@@ -9,6 +9,34 @@ from framework.utils.excel_loader import load_excel_kv
 from framework.utils.locator_loader import LocatorLoader
 
 
+def pytest_addoption(parser):
+    """Author: taobo.zhou
+    注册 pytest 命令行参数。
+
+        parser: pytest 参数解析器。
+    """
+
+    group = parser.getgroup("phantomwars")
+    group.addoption(
+        "--pw-worker",
+        action="store_true",
+        default=False,
+        help="标记当前进程为 worker",
+    )
+    group.addoption(
+        "--pw-sheet",
+        action="store",
+        default=None,
+        help="仅运行指定 sheet",
+    )
+    group.addoption(
+        "--pw-run-dir",
+        action="store",
+        default=None,
+        help="指定当前进程输出目录",
+    )
+
+
 @pytest.fixture(scope="session")
 def config():
     """Author: taobo.zhou

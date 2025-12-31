@@ -232,18 +232,6 @@ def _normalize_status(outc: str) -> str:
     return mapping.get(outc, outc)
 
 
-def pytest_addoption(parser):
-    """Author: taobo.zhou
-    注册 pytest 命令行参数。
-    
-        parser: pytest 参数解析器。
-    """
-
-    parser.addoption("--pw-sheet", action="store", default=None, help="仅运行指定 sheet")
-    parser.addoption("--pw-worker", action="store_true", help="标记当前进程为 worker")
-    parser.addoption("--pw-run-dir", action="store", default=None, help="指定当前进程输出目录")
-
-
 def pytest_configure(config):
     """Author: taobo.zhou
     初始化 pytest 配置与重跑策略。
