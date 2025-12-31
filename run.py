@@ -23,6 +23,11 @@ log = get_logger()
 
 @dataclass
 class CaseResult:
+    """Author: taobo.zhou
+    中文：用于汇总报告的用例执行结果。
+    English: Case result data for report aggregation.
+    """
+
     case_id: str
     sheet: str
     status: str
@@ -36,14 +41,31 @@ class CaseResult:
 
 
 def _now_ts() -> str:
+    """Author: taobo.zhou
+    中文：获取当前时间戳字符串。
+    参数: 无。
+    """
+
     return time.strftime("%Y%m%d_%H%M%S")
 
 
 def _ensure_dir(path: Path) -> None:
+    """Author: taobo.zhou
+    中文：确保目录存在。
+    参数:
+        path: 目标目录路径。
+    """
+
     path.mkdir(parents=True, exist_ok=True)
 
 
 def _resolve_data_path(cfg: dict) -> Path:
+    """Author: taobo.zhou
+    中文：解析测试数据文件路径。
+    参数:
+        cfg: 配置字典。
+    """
+
     project_root = Path(cfg.get("_project_root", "."))
     data_path = Path(cfg["paths"]["data"])
     if not data_path.is_absolute():
@@ -52,6 +74,12 @@ def _resolve_data_path(cfg: dict) -> Path:
 
 
 def _load_sheet_names(cfg: dict) -> List[str]:
+    """Author: taobo.zhou
+    中文：读取 Excel 中所有 sheet 名称。
+    参数:
+        cfg: 配置字典。
+    """
+
     data_path = _resolve_data_path(cfg)
     if not data_path.exists():
         raise RuntimeError(f"Excel 数据文件不存在: {data_path}")
@@ -63,6 +91,14 @@ def _load_sheet_names(cfg: dict) -> List[str]:
 
 
 def _run_sheet(sheet: str, run_dir: Path, run_root: Path) -> int:
+    """Author: taobo.zhou
+    中文：运行指定 sheet 的 pytest 用例。
+    参数:
+        sheet: sheet 名称。
+        run_dir: 当前 sheet 的运行目录。
+        run_root: 运行根目录。
+    """
+
     env = os.environ.copy()
     env["PW_WORKER"] = "1"
     env["PW_RUN_DIR"] = str(run_dir)
@@ -85,6 +121,12 @@ def _run_sheet(sheet: str, run_dir: Path, run_root: Path) -> int:
 
 
 def _normalize_status(status: str) -> str:
+    """Author: taobo.zhou
+    中文：规范化状态字符串用于报告输出。
+    参数:
+        status: 原始状态字符串。
+    """
+
     mapping = {
         "PASSED": "PASS",
         "FAILED": "FAIL",
@@ -98,6 +140,13 @@ def _normalize_status(status: str) -> str:
 
 
 def _collect_results(run_root: Path, sheet_names: List[str]) -> tuple[List[CaseResult], Dict[str, dict], Dict[str, int]]:
+    """Author: taobo.zhou
+    中文：汇总所有 sheet 的运行结果。
+    参数:
+        run_root: 运行根目录。
+        sheet_names: sheet 名称列表。
+    """
+
     results: List[CaseResult] = []
     case_params: Dict[str, dict] = {}
     counts = {"total": 0, "passed": 0, "failed": 0, "error": 0, "skipped": 0}
@@ -143,6 +192,13 @@ def _collect_results(run_root: Path, sheet_names: List[str]) -> tuple[List[CaseR
 
 
 def _zip_screenshots(run_root: Path, ts: str) -> Optional[str]:
+    """Author: taobo.zhou
+    中文：打包所有截图并返回 zip 路径。
+    参数:
+        run_root: 运行根目录。
+        ts: 时间戳字符串。
+    """
+
     reports_dir = run_root / "reports"
     _ensure_dir(reports_dir)
     zip_path = reports_dir / f"screenshots_{ts}.zip"
@@ -162,6 +218,11 @@ def _zip_screenshots(run_root: Path, ts: str) -> Optional[str]:
 
 
 def main() -> int:
+    """Author: taobo.zhou
+    中文：主入口，执行并汇总自动化测试。
+    参数: 无。
+    """
+
     cfg = load_config()
     max_workers = int(cfg.get("runner", {}).get("max_workers", 1))
     sheet_names = _load_sheet_names(cfg)

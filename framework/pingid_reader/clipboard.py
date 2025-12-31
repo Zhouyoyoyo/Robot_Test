@@ -1,10 +1,3 @@
-"""剪贴板读取模块。
-
-Clipboard reader module.
-
-Author: taobo.zhou
-"""
-
 import time
 import re
 import win32clipboard
@@ -14,6 +7,11 @@ log = get_logger()
 
 
 def clear_clipboard():
+    """Author: taobo.zhou
+    中文：清空系统剪贴板内容。
+    参数: 无。
+    """
+
     try:
         win32clipboard.OpenClipboard()
         win32clipboard.EmptyClipboard()
@@ -24,6 +22,12 @@ def clear_clipboard():
 
 
 def read_otp_from_clipboard(timeout_sec: float = 3.0) -> str:
+    """Author: taobo.zhou
+    中文：从剪贴板读取 OTP 验证码。
+    参数:
+        timeout_sec: 读取超时时间（秒）。
+    """
+
     end = time.time() + timeout_sec
 
     while time.time() < end:

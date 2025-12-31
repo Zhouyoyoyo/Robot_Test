@@ -2,13 +2,13 @@ from openpyxl import load_workbook
 
 
 def load_excel_kv(path: str, sheet_name: str) -> dict:
+    """Author: taobo.zhou
+    中文：从 Excel 指定 sheet 读取键值对数据。
+    参数:
+        path: Excel 文件路径。
+        sheet_name: 需要读取的 sheet 名称。
     """
-    从 Excel 的指定 sheet 中读取 key-value 数据
-    约定：
-    - 第 1 行是表头
-    - 从第 2 行开始
-    - A 列为 key，B 列为 value
-    """
+
     wb = load_workbook(path, data_only=True)
 
     if sheet_name not in wb.sheetnames:
@@ -29,13 +29,12 @@ def load_excel_kv(path: str, sheet_name: str) -> dict:
 
 
 def load_excel_sheets_kv(path: str) -> dict:
+    """Author: taobo.zhou
+    中文：读取 Excel 中的所有 sheet 并返回键值对集合。
+    参数:
+        path: Excel 文件路径。
     """
-    读取 Excel 中的所有 sheet，返回：
-    {
-      sheet_name: { key: value, ... },
-      ...
-    }
-    """
+
     wb = load_workbook(path, data_only=True)
     if not wb.sheetnames:
         raise RuntimeError("Excel 中至少必须存在一个 sheet")

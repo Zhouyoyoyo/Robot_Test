@@ -8,8 +8,6 @@ paths:
   data: data/testdata.xlsx
   locator: locators/locator.yaml
   screenshots: output/screenshots
-
-# ✅ selenium 全局配置（BasePage 默认读取这里）
 selenium:
   implicit_wait: 0
   explicit_wait: 60
@@ -20,7 +18,6 @@ pingid:
   exe_path: "C:/Program Files (x86)/Ping Identity/PingID/PingID.exe"
   window_title_keyword: "PingID"
 
-  # 第一次 ensure_ready 前强制清理残留 PingID.exe（默认 true）
   clean_start: true
 
   window:
@@ -31,10 +28,7 @@ pingid:
   clipboard:
     read_timeout: 3.0
 
-# ✅ 并发执行配置
 runner:
-  # 最大并发线程数（每个线程独立浏览器实例）
-  # PingID 会自动串行，不会破坏并发稳定性
   max_workers: 2
 
 mail:
@@ -47,7 +41,7 @@ mail:
 
   auth:
     username: botao_zhou@qq.com
-    password: pyipbzmenzupbbhb   # SMTP 授权码，不是邮箱登录密码
+    password: pyipbzmenzupbbhb
 
   sender:
     name: Selenium Automation
@@ -56,4 +50,3 @@ mail:
   receivers:
     - botao_zhou@qq.com
     - botao_zhou@qq.com
-

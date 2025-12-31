@@ -1,10 +1,3 @@
-"""邮件发送模块。
-
-Mail sender module.
-
-Author: taobo.zhou
-"""
-
 from __future__ import annotations
 
 import os
@@ -25,6 +18,12 @@ log = get_logger()
 
 
 def _render_summary(pytest_results: Mapping[str, Any] | None) -> str:
+    """Author: taobo.zhou
+    中文：渲染 pytest 结果摘要为 HTML。
+    参数:
+        pytest_results: pytest 结果映射。
+    """
+
     if not pytest_results:
         return "<p>No pytest results provided.</p>"
 
@@ -36,6 +35,12 @@ def _render_summary(pytest_results: Mapping[str, Any] | None) -> str:
 
 
 def _load_html_report(html_report: str | None) -> str:
+    """Author: taobo.zhou
+    中文：读取 HTML 报告内容。
+    参数:
+        html_report: HTML 报告路径或内容。
+    """
+
     if not html_report:
         return "<p>No HTML report attached.</p>"
     if os.path.exists(html_report):
@@ -52,6 +57,16 @@ def send_report(
     subject: str = "Robot BTV 自动化测试报告",
     extra_attachments: Iterable[str] | None = None,
 ) -> bool:
+    """Author: taobo.zhou
+    中文：发送测试报告邮件。
+    参数:
+        pytest_results: pytest 结果映射。
+        html_report: HTML 报告路径或内容。
+        screenshot_zip: 截图压缩包路径。
+        subject: 邮件主题。
+        extra_attachments: 额外附件路径列表。
+    """
+
     cfg = load_config()
     mail_cfg = cfg.get("mail", {})
 

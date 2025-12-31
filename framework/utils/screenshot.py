@@ -1,10 +1,3 @@
-"""截图工具模块。
-
-Screenshot utility module.
-
-Author: taobo.zhou
-"""
-
 import os
 from datetime import datetime
 
@@ -15,15 +8,15 @@ def take_screenshot(
     prefix: str = "case",
     stable: bool = False,
 ) -> str:
+    """Author: taobo.zhou
+    中文：保存截图并返回文件路径。
+    参数:
+        driver: WebDriver 实例。
+        folder: 截图输出目录。
+        prefix: 文件名前缀。
+        stable: 是否使用固定文件名。
     """
-    Take screenshot.
 
-    :param driver: selenium driver
-    :param folder: output folder
-    :param prefix: case identifier (建议传入 nodeid 处理后的唯一前缀)
-    :param stable: True 时使用固定文件名 {prefix}.png（可覆盖，适合重跑收口）
-                  False 时使用带时间戳文件名（默认兼容旧逻辑）
-    """
     os.makedirs(folder, exist_ok=True)
 
     if stable:
