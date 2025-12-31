@@ -1,10 +1,8 @@
 project:
-  aurix_app: https://demo
-  aurix_fbl: https://demo
   browser: edge
   urls:
-    "1": https://url-for-sheet-1
-    "2": https://url-for-sheet-2
+    "aurix_app": https://url-for-sheet-1
+    "aurix_fbl": https://url-for-sheet-2
 
 paths:
   data: data/testdata.xlsx
