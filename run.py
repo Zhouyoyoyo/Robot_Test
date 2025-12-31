@@ -84,10 +84,13 @@ def _load_sheet_names(cfg: dict) -> List[str]:
     if not data_path.exists():
         raise RuntimeError(f"Excel 数据文件不存在: {data_path}")
     wb = load_workbook(str(data_path), read_only=True, data_only=True)
-    sheet_names = wb.sheetnames
-    if not sheet_names:
-        raise RuntimeError("Excel 中至少必须存在一个 sheet")
-    return sheet_names
+    try:
+        sheet_names = wb.sheetnames
+        if not sheet_names:
+            raise RuntimeError("Excel 中至少必须存在一个 sheet")
+        return sheet_names
+    finally:
+        wb.close()
 
 
 def _run_sheet(sheet: str, run_dir: Path, run_root: Path) -> int:
