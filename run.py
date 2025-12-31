@@ -114,6 +114,7 @@ def _run_sheet(sheet: str, run_dir: Path, run_root: Path) -> int:
         sheet,
         "--pw-run-dir",
         str(run_dir),
+        "tests",
     ]
     log.info("[PW][RUN] %s", " ".join(cmd))
     completed = subprocess.run(cmd, env=env)

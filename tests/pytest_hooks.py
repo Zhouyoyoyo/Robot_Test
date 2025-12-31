@@ -105,6 +105,23 @@ def _take_screenshot(driver, out_dir: Path, sheet_name: str, attempt: int) -> Op
         return None
 
 
+def _cleanup_previous_screenshots(out_dir: Path, sheet_name: str) -> None:
+    """Author: taobo.zhou
+    删除同一 sheet 的旧 attempt 截图，保证只保留最新一次。
+    
+        out_dir: 截图输出目录路径。
+        sheet_name: 用例所属 sheet 名称。
+    """
+
+    if not out_dir.exists():
+        return
+    safe_sheet = _safe_name(sheet_name)
+    prefix = f"{safe_sheet}__attempt"
+    for path in out_dir.iterdir():
+        if path.is_file() and path.name.startswith(prefix) and path.suffix == ".png":
+            path.unlink()
+
+
 def _zip_dir(src_dir: Path, zip_path: Path) -> Optional[str]:
     """Author: taobo.zhou
     将目录内容打包为 zip 文件并返回路径。
@@ -339,6 +356,7 @@ def pytest_runtest_makereport(item, call):
         ss_dir = Path(cfg["paths"]["screenshots"])
         ss_path = None
         if driver is not None:
+            _cleanup_previous_screenshots(ss_dir, sheet_name)
             ss_path = _take_screenshot(driver, ss_dir, sheet_name, attempt)
 
         if getattr(item, "_pw_error", False):
