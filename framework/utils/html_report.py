@@ -1,10 +1,3 @@
-"""HTML 报告构建模块。
-
-HTML report builder module.
-
-Author: taobo.zhou
-"""
-
 from __future__ import annotations
 
 from datetime import datetime
@@ -18,10 +11,22 @@ def build_html_report(
     results: List[Any],
     case_params: Dict[str, Dict[str, Any]],
 ) -> Dict[str, Any]:
+    """Author: taobo.zhou
+    中文：构建 HTML 报告内容及附件信息。
+    参数:
+        results: 用例结果列表。
+        case_params: 用例参数字典。
+    """
+
     inline_images: Dict[str, str] = {}
     attachments: List[str] = []
 
     def new_cid() -> str:
+        """Author: taobo.zhou
+        中文：生成内联图片的内容 ID。
+        参数: 无。
+        """
+
         return f"img_{uuid.uuid4().hex}@report"
 
     rows_html = []

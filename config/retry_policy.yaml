@@ -1,35 +1,23 @@
-# Retry policy configuration
-# 用于控制哪些失败可以重跑
-
 retry:
-  max_retry: 1   # 最多重跑次数（1 = 失败后再跑一次）
-
-  # 一票否决：命中这些关键字 → 永不重跑
+  max_retry: 1
   non_retryable_keywords:
     - AssertionError
-    - assert 
+    - assert
     - assertion failed
     - expected
     - but got
-
-  # 白名单：命中这些关键字 → 允许重跑
   retryable_keywords:
-    # Selenium / WebDriver
     - TimeoutException
     - StaleElementReferenceException
     - ElementClickInterceptedException
     - ElementNotInteractableException
     - NoSuchElementException
     - WebDriverException
-
-    # 网络 / 通信
     - ConnectionError
     - Connection refused
     - RemoteDisconnected
     - Read timed out
     - Max retries exceeded
-
-    # 浏览器 / 页面不稳定
     - javascript error
     - target frame detached
     - chrome not reachable

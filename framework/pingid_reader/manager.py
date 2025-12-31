@@ -1,10 +1,3 @@
-"""PingID OTP 管理模块。
-
-PingID OTP manager module.
-
-Author: taobo.zhou
-"""
-
 import threading
 from contextlib import contextmanager
 import time
@@ -28,17 +21,21 @@ log = get_logger()
 
 
 class PingIDOtpManager:
-    """PingID OTP 管理器。
-
-    PingID OTP manager.
-
-    Author: taobo.zhou
+    """Author: taobo.zhou
+    中文：PingID OTP 管理器，负责启动与读取验证码。
+    English: PingID OTP manager responsible for startup and OTP retrieval.
     """
+
     _instance = None
     _lock = threading.Lock()
     _use_lock = threading.Lock()
 
     def __init__(self):
+        """Author: taobo.zhou
+        中文：初始化 PingID 配置与运行状态。
+        参数: 无。
+        """
+
         self._ready = False
         self._hwnd = None
 
@@ -60,12 +57,23 @@ class PingIDOtpManager:
 
     @classmethod
     def get(cls):
+        """Author: taobo.zhou
+        中文：获取 PingIDOtpManager 单例实例。
+        参数:
+            cls: 类对象。
+        """
+
         with cls._lock:
             if cls._instance is None:
                 cls._instance = PingIDOtpManager()
             return cls._instance
 
     def ensure_ready(self):
+        """Author: taobo.zhou
+        中文：确保 PingID 应用已启动并可用。
+        参数: 无。
+        """
+
         if self._ready and self._hwnd:
             return
 
@@ -92,6 +100,11 @@ class PingIDOtpManager:
         log.info("PingID ready")
 
     def shutdown(self):
+        """Author: taobo.zhou
+        中文：关闭 PingID 应用并重置状态。
+        参数: 无。
+        """
+
         log.info("[PingID] shutdown")
 
         try:
@@ -105,6 +118,11 @@ class PingIDOtpManager:
         self._hwnd = None
 
     def _is_pingid_running(self) -> bool:
+        """Author: taobo.zhou
+        中文：判断 PingID 进程是否正在运行。
+        参数: 无。
+        """
+
         for proc in psutil.process_iter(attrs=["name"]):
             try:
                 name = (proc.info.get("name") or "").lower()
@@ -115,6 +133,11 @@ class PingIDOtpManager:
         return False
 
     def _kill_existing_pingid_processes(self):
+        """Author: taobo.zhou
+        中文：强制关闭现有 PingID 进程。
+        参数: 无。
+        """
+
         killed_pids = []
         for proc in psutil.process_iter(attrs=["pid", "name"]):
             try:
@@ -131,6 +154,11 @@ class PingIDOtpManager:
             time.sleep(1.5)
 
     def _start_pingid(self):
+        """Author: taobo.zhou
+        中文：启动 PingID 应用。
+        参数: 无。
+        """
+
         if not self.exe_path or not self.exe_path.exists():
             raise FileNotFoundError(f"PingID exe not found: {self.exe_path}")
 
@@ -138,6 +166,11 @@ class PingIDOtpManager:
         subprocess.Popen([str(self.exe_path)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     def copy_otp(self) -> str:
+        """Author: taobo.zhou
+        中文：复制并返回 PingID OTP 验证码。
+        参数: 无。
+        """
+
         self.ensure_ready()
 
         clear_clipboard()
@@ -151,6 +184,12 @@ class PingIDOtpManager:
 
     @contextmanager
     def exclusive(self, shutdown_after: bool = True):
+        """Author: taobo.zhou
+        中文：在全局锁内独占使用 PingID。
+        参数:
+            shutdown_after: 是否在结束后关闭 PingID。
+        """
+
         with pingid_global_lock():
             PingIDOtpManager._use_lock.acquire()
             try:

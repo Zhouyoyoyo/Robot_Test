@@ -1,10 +1,3 @@
-"""浏览器驱动工厂模块。
-
-Browser driver factory module.
-
-Author: taobo.zhou
-"""
-
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.edge.options import Options as EdgeOptions
@@ -14,6 +7,12 @@ from framework.utils.config_loader import load_config
 
 
 def create_driver(browser: str | None = None):
+    """Author: taobo.zhou
+    中文：根据配置创建并返回浏览器驱动。
+    参数:
+        browser: 浏览器类型，可为 chrome、edge、firefox，未传则读取配置。
+    """
+
     if browser is None:
         cfg = load_config()
         browser = cfg.get("project", {}).get("browser", "chrome")
