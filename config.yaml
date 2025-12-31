@@ -1,9 +1,9 @@
 project:
   browser: edge
   urls:
-    "aurix_app": https://url-for-sheet-1
-    "aurix_fbl": https://url-for-sheet-2
-
+   aurix_app: https://portal.mbos.mercedes-benz.com/software-container/container/ec844239-9088-46e5-a5c3-098247fffaea/overview
+   aurix_fbl: https://portal.mbos.mercedes-benz.com/software-container/container/e243eaa9-c7f5-4116-b1ec-7c663d3f522c/overview
+   
 paths:
   data: data/testdata.xlsx
   locator: locators/locator.yaml
@@ -48,5 +48,5 @@ mail:
     address: botao_zhou@qq.com
 
   receivers:
-    - botao_zhou@qq.com
+    - thundersoft.a.zhou@mercedes-benz.com
     - botao_zhou@qq.com
