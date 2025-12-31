@@ -35,7 +35,7 @@ pingid:
 runner:
   # 最大并发线程数（每个线程独立浏览器实例）
   # PingID 会自动串行，不会破坏并发稳定性
-  max_workers: 4
+  max_workers: 2
 
 mail:
   enable: true
