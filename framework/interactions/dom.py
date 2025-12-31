@@ -3,14 +3,14 @@ from selenium.webdriver.support.select import Select
 
 class DomMixin:
     """Author: taobo.zhou
-    中文：DOM 交互混入类，提供基础元素操作。
-    English: DOM interaction mixin providing basic element operations.
+    DOM 交互混入类，提供基础元素操作。
+    DOM interaction mixin providing basic element operations.
     """
 
     def _get_locator(self, name):
         """Author: taobo.zhou
-        中文：获取定位器配置。
-        参数:
+        获取定位器配置。
+        
             name: 定位器名称。
         """
 
@@ -18,8 +18,8 @@ class DomMixin:
 
     def _find(self, name):
         """Author: taobo.zhou
-        中文：查找并返回页面元素。
-        参数:
+        查找并返回页面元素。
+        
             name: 定位器名称。
         """
 
@@ -28,8 +28,8 @@ class DomMixin:
 
     def open(self, url: str):
         """Author: taobo.zhou
-        中文：打开指定 URL。
-        参数:
+        打开指定 URL。
+        
             url: 目标页面地址。
         """
 
@@ -38,8 +38,8 @@ class DomMixin:
 
     def click(self, name):
         """Author: taobo.zhou
-        中文：点击指定元素。
-        参数:
+        点击指定元素。
+        
             name: 定位器名称。
         """
 
@@ -48,8 +48,8 @@ class DomMixin:
 
     def input(self, name, text):
         """Author: taobo.zhou
-        中文：清空后输入文本。
-        参数:
+        清空后输入文本。
+        
             name: 定位器名称。
             text: 需要输入的文本。
         """
@@ -60,8 +60,8 @@ class DomMixin:
 
     def select(self, name, option, by: str = "text"):
         """Author: taobo.zhou
-        中文：在下拉框中选择选项。
-        参数:
+        在下拉框中选择选项。
+        
             name: 定位器名称。
             option: 选项值。
             by: 选择方式，支持 text、value、index。
@@ -83,8 +83,8 @@ class DomMixin:
 
     def upload(self, name: str, file_path: str):
         """Author: taobo.zhou
-        中文：上传文件到指定输入框。
-        参数:
+        上传文件到指定输入框。
+        
             name: 定位器名称。
             file_path: 本地文件路径。
         """
@@ -96,8 +96,8 @@ class DomMixin:
 
     def scroll_and_wait(self, name):
         """Author: taobo.zhou
-        中文：滚动到指定元素位置。
-        参数:
+        滚动到指定元素位置。
+        
             name: 定位器名称。
         """
 
@@ -109,8 +109,8 @@ class DomMixin:
 
     def set_attr(self, name, attr, value):
         """Author: taobo.zhou
-        中文：设置元素属性值。
-        参数:
+        设置元素属性值。
+        
             name: 定位器名称。
             attr: 属性名。
             value: 属性值。
@@ -126,8 +126,8 @@ class DomMixin:
 
     def get_element_attr(self, name, attr_name):
         """Author: taobo.zhou
-        中文：获取元素属性值。
-        参数:
+        获取元素属性值。
+        
             name: 定位器名称。
             attr_name: 属性名。
         """

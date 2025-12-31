@@ -13,8 +13,8 @@ log = get_logger()
 
 def find_pingid_hwnd(window_title_keyword: str) -> int | None:
     """Author: taobo.zhou
-    中文：根据窗口标题关键字查找 PingID 窗口句柄。
-    参数:
+    根据窗口标题关键字查找 PingID 窗口句柄。
+    
         window_title_keyword: 窗口标题关键字。
     """
 
@@ -22,8 +22,8 @@ def find_pingid_hwnd(window_title_keyword: str) -> int | None:
 
     def enum_handler(hwnd, _):
         """Author: taobo.zhou
-        中文：枚举窗口句柄并匹配 PingID 窗口。
-        参数:
+        枚举窗口句柄并匹配 PingID 窗口。
+        
             hwnd: 窗口句柄。
             _: 预留参数，占位。
         """
@@ -57,8 +57,8 @@ def wait_for_pingid_window(
     poll_interval: float = 0.25,
 ) -> int:
     """Author: taobo.zhou
-    中文：等待 PingID 窗口出现并返回句柄。
-    参数:
+    等待 PingID 窗口出现并返回句柄。
+    
         title_keyword: 窗口标题关键字。
         timeout: 最大等待时间（秒）。
         poll_interval: 轮询间隔（秒）。
@@ -86,8 +86,8 @@ def normalize_pingid_window(
     min_height: int,
 ):
     """Author: taobo.zhou
-    中文：恢复并调整 PingID 窗口大小。
-    参数:
+    恢复并调整 PingID 窗口大小。
+    
         hwnd: PingID 窗口句柄。
         min_width: 窗口最小宽度。
         min_height: 窗口最小高度。
@@ -127,8 +127,8 @@ def normalize_pingid_window(
 
 def click_copy_button(hwnd: int):
     """Author: taobo.zhou
-    中文：点击 PingID 窗口中的复制按钮。
-    参数:
+    点击 PingID 窗口中的复制按钮。
+    
         hwnd: PingID 窗口句柄。
     """
 

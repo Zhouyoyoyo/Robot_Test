@@ -3,14 +3,14 @@ from selenium.webdriver.common.by import By
 
 class ShadowDomMixin:
     """Author: taobo.zhou
-    中文：Shadow DOM 交互混入类，提供 Shadow Root 操作。
-    English: Shadow DOM interaction mixin providing shadow root operations.
+    Shadow DOM 交互混入类，提供 Shadow Root 操作。
+    Shadow DOM interaction mixin providing shadow root operations.
     """
 
     def _get_shadow_host_locator(self, name):
         """Author: taobo.zhou
-        中文：获取 Shadow Host 的定位器。
-        参数:
+        获取 Shadow Host 的定位器。
+        
             name: 定位器名称。
         """
 
@@ -20,8 +20,8 @@ class ShadowDomMixin:
 
     def get_shadow_element(self, locator_name):
         """Author: taobo.zhou
-        中文：获取 Shadow DOM 内部元素。
-        参数:
+        获取 Shadow DOM 内部元素。
+        
             locator_name: 定位器名称。
         """
 
@@ -40,8 +40,8 @@ class ShadowDomMixin:
         input_or_textarea: str = "input",
     ):
         """Author: taobo.zhou
-        中文：在 Shadow DOM 输入文本。
-        参数:
+        在 Shadow DOM 输入文本。
+        
             locator_name: 定位器名称。
             text: 需要输入的文本。
             input_or_textarea: 输入控件类型，input 或 textarea。
@@ -72,8 +72,8 @@ class ShadowDomMixin:
 
     def click_shadow_dom(self, locator_name: str):
         """Author: taobo.zhou
-        中文：点击 Shadow DOM 元素。
-        参数:
+        点击 Shadow DOM 元素。
+        
             locator_name: 定位器名称。
         """
 
@@ -85,8 +85,8 @@ class ShadowDomMixin:
 
     def upload_in_shadow_dom(self, name: str, file_path: str):
         """Author: taobo.zhou
-        中文：在 Shadow DOM 上传文件。
-        参数:
+        在 Shadow DOM 上传文件。
+        
             name: 定位器名称。
             file_path: 本地文件路径。
         """

@@ -8,8 +8,8 @@ _CURRENT_TEST: ContextVar[str] = ContextVar("CURRENT_TEST", default="-")
 
 def set_current_test(name: str) -> None:
     """Author: taobo.zhou
-    中文：设置当前测试名称上下文。
-    参数:
+    设置当前测试名称上下文。
+    
         name: 当前测试名称。
     """
 
@@ -18,14 +18,14 @@ def set_current_test(name: str) -> None:
 
 class _InjectTestNameFilter(logging.Filter):
     """Author: taobo.zhou
-    中文：日志过滤器，注入测试名称到记录中。
-    English: Logger filter injecting test name into log records.
+    日志过滤器，注入测试名称到记录中。
+    Logger filter injecting test name into log records.
     """
 
     def filter(self, record: logging.LogRecord) -> bool:
         """Author: taobo.zhou
-        中文：在日志记录中填充测试名称。
-        参数:
+        在日志记录中填充测试名称。
+        
             record: 日志记录对象。
         """
 
@@ -48,8 +48,8 @@ LOGGER_NAME = "automation_logger"
 
 def get_logger() -> logging.Logger:
     """Author: taobo.zhou
-    中文：获取全局日志记录器。
-    参数: 无。
+    获取全局日志记录器。
+     无。
     """
 
     logger = logging.getLogger(LOGGER_NAME)
@@ -85,8 +85,8 @@ def get_logger() -> logging.Logger:
 
 def get_page_logger(page_name: str | None = None) -> logging.Logger:
     """Author: taobo.zhou
-    中文：获取页面级日志记录器。
-    参数:
+    获取页面级日志记录器。
+    
         page_name: 页面名称，可为空。
     """
 

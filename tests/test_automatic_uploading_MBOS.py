@@ -10,8 +10,8 @@ def test_automatic_uploading_MBOS(
     base_url,
 ):
     """Author: taobo.zhou
-    中文：执行自动化上传用例。
-    参数:
+    执行自动化上传用例。
+    
         driver: WebDriver 实例，用于页面操作。
         config: 全局配置字典，包含定位器加载器等信息。
         sheet_name: 用例数据所在的 sheet 名称。

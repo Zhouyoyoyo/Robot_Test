@@ -24,8 +24,8 @@ log = get_logger()
 @dataclass
 class CaseResult:
     """Author: taobo.zhou
-    中文：用于汇总报告的用例执行结果。
-    English: Case result data for report aggregation.
+    用于汇总报告的用例执行结果。
+    Case result data for report aggregation.
     """
 
     case_id: str
@@ -42,8 +42,8 @@ class CaseResult:
 
 def _now_ts() -> str:
     """Author: taobo.zhou
-    中文：获取当前时间戳字符串。
-    参数: 无。
+    获取当前时间戳字符串。
+     无。
     """
 
     return time.strftime("%Y%m%d_%H%M%S")
@@ -51,8 +51,8 @@ def _now_ts() -> str:
 
 def _ensure_dir(path: Path) -> None:
     """Author: taobo.zhou
-    中文：确保目录存在。
-    参数:
+    确保目录存在。
+    
         path: 目标目录路径。
     """
 
@@ -61,8 +61,8 @@ def _ensure_dir(path: Path) -> None:
 
 def _resolve_data_path(cfg: dict) -> Path:
     """Author: taobo.zhou
-    中文：解析测试数据文件路径。
-    参数:
+    解析测试数据文件路径。
+    
         cfg: 配置字典。
     """
 
@@ -75,8 +75,8 @@ def _resolve_data_path(cfg: dict) -> Path:
 
 def _load_sheet_names(cfg: dict) -> List[str]:
     """Author: taobo.zhou
-    中文：读取 Excel 中所有 sheet 名称。
-    参数:
+    读取 Excel 中所有 sheet 名称。
+    
         cfg: 配置字典。
     """
 
@@ -92,8 +92,8 @@ def _load_sheet_names(cfg: dict) -> List[str]:
 
 def _run_sheet(sheet: str, run_dir: Path, run_root: Path) -> int:
     """Author: taobo.zhou
-    中文：运行指定 sheet 的 pytest 用例。
-    参数:
+    运行指定 sheet 的 pytest 用例。
+    
         sheet: sheet 名称。
         run_dir: 当前 sheet 的运行目录。
         run_root: 运行根目录。
@@ -122,8 +122,8 @@ def _run_sheet(sheet: str, run_dir: Path, run_root: Path) -> int:
 
 def _normalize_status(status: str) -> str:
     """Author: taobo.zhou
-    中文：规范化状态字符串用于报告输出。
-    参数:
+    规范化状态字符串用于报告输出。
+    
         status: 原始状态字符串。
     """
 
@@ -141,8 +141,8 @@ def _normalize_status(status: str) -> str:
 
 def _collect_results(run_root: Path, sheet_names: List[str]) -> tuple[List[CaseResult], Dict[str, dict], Dict[str, int]]:
     """Author: taobo.zhou
-    中文：汇总所有 sheet 的运行结果。
-    参数:
+    汇总所有 sheet 的运行结果。
+    
         run_root: 运行根目录。
         sheet_names: sheet 名称列表。
     """
@@ -193,8 +193,8 @@ def _collect_results(run_root: Path, sheet_names: List[str]) -> tuple[List[CaseR
 
 def _zip_screenshots(run_root: Path, ts: str) -> Optional[str]:
     """Author: taobo.zhou
-    中文：打包所有截图并返回 zip 路径。
-    参数:
+    打包所有截图并返回 zip 路径。
+    
         run_root: 运行根目录。
         ts: 时间戳字符串。
     """
@@ -219,8 +219,8 @@ def _zip_screenshots(run_root: Path, ts: str) -> Optional[str]:
 
 def main() -> int:
     """Author: taobo.zhou
-    中文：主入口，执行并汇总自动化测试。
-    参数: 无。
+    主入口，执行并汇总自动化测试。
+     无。
     """
 
     cfg = load_config()

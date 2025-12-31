@@ -6,14 +6,14 @@ from selenium.webdriver.common.by import By
 
 class LocatorLoader:
     """Author: taobo.zhou
-    中文：定位器加载器，负责读取并校验定位器配置。
-    English: Locator loader that reads and validates locator configurations.
+    定位器加载器，负责读取并校验定位器配置。
+    Locator loader that reads and validates locator configurations.
     """
 
     def __init__(self, yaml_path):
         """Author: taobo.zhou
-        中文：初始化定位器加载器。
-        参数:
+        初始化定位器加载器。
+        
             yaml_path: 定位器 YAML 文件路径。
         """
 
@@ -24,8 +24,8 @@ class LocatorLoader:
 
     def validate_all(self):
         """Author: taobo.zhou
-        中文：校验定位器配置结构。
-        参数: 无。
+        校验定位器配置结构。
+         无。
         """
 
         if not isinstance(self.data, dict):
@@ -40,8 +40,8 @@ class LocatorLoader:
 
     def get(self, page, name):
         """Author: taobo.zhou
-        中文：获取指定页面的定位器配置。
-        参数:
+        获取指定页面的定位器配置。
+        
             page: 页面名称。
             name: 定位器名称。
         """
@@ -54,14 +54,14 @@ class LocatorLoader:
 
 class PageLocators:
     """Author: taobo.zhou
-    中文：页面定位器代理，转换为 Selenium 定位器。
-    English: Page locator proxy that converts to Selenium locators.
+    页面定位器代理，转换为 Selenium 定位器。
+    Page locator proxy that converts to Selenium locators.
     """
 
     def __init__(self, loader: LocatorLoader, page_name: str):
         """Author: taobo.zhou
-        中文：初始化页面定位器代理。
-        参数:
+        初始化页面定位器代理。
+        
             loader: LocatorLoader 实例。
             page_name: 页面名称。
         """
@@ -71,8 +71,8 @@ class PageLocators:
 
     def get(self, name):
         """Author: taobo.zhou
-        中文：获取页面定位器并转换为 Selenium 定位器。
-        参数:
+        获取页面定位器并转换为 Selenium 定位器。
+        
             name: 定位器名称。
         """
 
@@ -81,8 +81,8 @@ class PageLocators:
 
     def get_shadow_host(self, name):
         """Author: taobo.zhou
-        中文：获取 Shadow Host 的定位器。
-        参数:
+        获取 Shadow Host 的定位器。
+        
             name: 定位器名称。
         """
 
@@ -94,8 +94,8 @@ class PageLocators:
 
 def _convert_locator(locator_type: str, locator_value: str):
     """Author: taobo.zhou
-    中文：将定位器类型转换为 Selenium By。
-    参数:
+    将定位器类型转换为 Selenium By。
+    
         locator_type: 定位器类型字符串。
         locator_value: 定位器值。
     """
@@ -116,8 +116,8 @@ def _convert_locator(locator_type: str, locator_value: str):
 
 def build_page_locators(locator_loader, page_name: str):
     """Author: taobo.zhou
-    中文：构建页面定位器代理或返回原加载器。
-    参数:
+    构建页面定位器代理或返回原加载器。
+    
         locator_loader: 定位器加载器或代理。
         page_name: 页面名称。
     """

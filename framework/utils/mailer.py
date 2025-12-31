@@ -19,8 +19,8 @@ log = get_logger()
 
 def _render_summary(pytest_results: Mapping[str, Any] | None) -> str:
     """Author: taobo.zhou
-    中文：渲染 pytest 结果摘要为 HTML。
-    参数:
+    渲染 pytest 结果摘要为 HTML。
+    
         pytest_results: pytest 结果映射。
     """
 
@@ -36,8 +36,8 @@ def _render_summary(pytest_results: Mapping[str, Any] | None) -> str:
 
 def _load_html_report(html_report: str | None) -> str:
     """Author: taobo.zhou
-    中文：读取 HTML 报告内容。
-    参数:
+    读取 HTML 报告内容。
+    
         html_report: HTML 报告路径或内容。
     """
 
@@ -58,8 +58,8 @@ def send_report(
     extra_attachments: Iterable[str] | None = None,
 ) -> bool:
     """Author: taobo.zhou
-    中文：发送测试报告邮件。
-    参数:
+    发送测试报告邮件。
+    
         pytest_results: pytest 结果映射。
         html_report: HTML 报告路径或内容。
         screenshot_zip: 截图压缩包路径。
