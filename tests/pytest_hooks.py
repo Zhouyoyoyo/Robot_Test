@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import re
@@ -83,7 +84,46 @@ def _safe_name(s: str) -> str:
     return re.sub(r"[^A-Za-z0-9_.=-]+", "_", s)
 
 
-def _take_screenshot(driver, out_dir: Path, sheet_name: str, attempt: int) -> Optional[str]:
+def _safe_nodeid(nodeid: str) -> str:
+    """Author: taobo.zhou
+    将 nodeid 转换为安全稳定的文件名片段。
+    
+        nodeid: pytest 用例唯一标识。
+    """
+
+    try:
+        base = str(nodeid).split("::")[-1]
+    except Exception:
+        base = str(nodeid)
+    safe_test_name = _safe_name(base)[:60]
+    digest = hashlib.sha1(str(nodeid).encode("utf-8")).hexdigest()[:8]
+    return f"{safe_test_name}_{digest}"
+
+
+def _get_driver_from_item(item):
+    """Author: taobo.zhou
+    优先从 session 获取 driver，其次从 funcargs 获取。
+    
+        item: pytest 用例项对象。
+    """
+
+    try:
+        session = getattr(item, "session", None)
+        driver = getattr(session, "driver", None)
+        if driver is not None:
+            return driver
+        return item.funcargs.get("driver")
+    except Exception:
+        return None
+
+
+def _take_screenshot(
+    driver,
+    out_dir: Path,
+    sheet_name: str,
+    nodeid: str,
+    attempt: int,
+) -> Optional[str]:
     """Author: taobo.zhou
     保存当前页面截图并返回文件路径。
     
@@ -95,8 +135,9 @@ def _take_screenshot(driver, out_dir: Path, sheet_name: str, attempt: int) -> Op
 
     try:
         _ensure_dir(out_dir)
-        ts = _now_ts()
-        fn = f"{_safe_name(sheet_name)}__attempt{attempt}__{ts}.png"
+        safe_sheet = _safe_name(sheet_name)
+        safe_node = _safe_nodeid(nodeid)
+        fn = f"{safe_sheet}__{safe_node}__attempt{attempt}.png"
         path = out_dir / fn
         driver.save_screenshot(str(path))
         return str(path)
@@ -105,7 +146,7 @@ def _take_screenshot(driver, out_dir: Path, sheet_name: str, attempt: int) -> Op
         return None
 
 
-def _cleanup_previous_screenshots(out_dir: Path, sheet_name: str) -> None:
+def _cleanup_previous_screenshots(out_dir: Path, sheet_name: str, nodeid: str) -> None:
     """Author: taobo.zhou
     删除同一 sheet 的旧 attempt 截图，保证只保留最新一次。
     
@@ -116,7 +157,8 @@ def _cleanup_previous_screenshots(out_dir: Path, sheet_name: str) -> None:
     if not out_dir.exists():
         return
     safe_sheet = _safe_name(sheet_name)
-    prefix = f"{safe_sheet}__attempt"
+    safe_node = _safe_nodeid(nodeid)
+    prefix = f"{safe_sheet}__{safe_node}__attempt"
     for path in out_dir.iterdir():
         if path.is_file() and path.name.startswith(prefix) and path.suffix == ".png":
             path.unlink()
@@ -155,6 +197,26 @@ def _get_sheet_name(item) -> str:
     except Exception:
         pass
     return "unknown_sheet"
+
+
+def _normalize_case_params(case_data: Optional[dict]) -> Dict[str, object]:
+    """Author: taobo.zhou
+    规范化 case_params，确保可 JSON 序列化。
+    
+        case_data: Excel KV 数据字典。
+    """
+
+    if not isinstance(case_data, dict):
+        return {}
+
+    normalized: Dict[str, object] = {}
+    for key, value in case_data.items():
+        key_str = str(key)
+        if value is None or isinstance(value, (str, int, float, bool)):
+            normalized[key_str] = value
+        else:
+            normalized[key_str] = str(value)
+    return normalized
 
 
 def _get_attempt(config, nodeid: str) -> int:
@@ -262,6 +324,7 @@ def pytest_configure(config):
     config._pw_attempts: Dict[str, int] = {}
     config._pw_final: Dict[str, Tuple[str, int, Optional[str], Optional[str], str]] = {}
     config._pw_rerun_left: Dict[str, int] = {}
+    config._pw_case_params: Dict[str, Dict[str, object]] = {}
 
     run_dir_opt = config.getoption("--pw-run-dir") or os.environ.get("PW_RUN_DIR")
     if run_dir_opt:
@@ -297,6 +360,55 @@ def pytest_configure(config):
     config._pw_default_reruns = max(0, int(max_retry))
 
     log.info(f"[PW] default reruns for error failures = {config._pw_default_reruns}")
+
+
+def _cache_case_params(item) -> None:
+    """Author: taobo.zhou
+    缓存当前 sheet 的 case_params 供结果汇总使用。
+    
+        item: pytest 用例项对象。
+    """
+
+    sheet_name = None
+    case_data = None
+    try:
+        sheet_name = item.funcargs.get("sheet_name")
+        case_data = item.funcargs.get("case_data")
+    except Exception:
+        sheet_name = None
+        case_data = None
+
+    if sheet_name is None or case_data is None:
+        try:
+            params = getattr(item, "callspec", None)
+            if params:
+                sheet_name = params.params.get("sheet_name", sheet_name)
+                case_data = params.params.get("case_data", case_data)
+        except Exception:
+            pass
+
+    if sheet_name:
+        item.config._pw_case_params[str(sheet_name)] = _normalize_case_params(case_data)
+
+
+def pytest_runtest_setup(item):
+    """Author: taobo.zhou
+    缓存当前 sheet 的 case_params 供结果汇总使用。
+    
+        item: pytest 用例项对象。
+    """
+
+    _cache_case_params(item)
+
+
+def pytest_runtest_call(item):
+    """Author: taobo.zhou
+    兜底缓存 case_params，确保已解析 fixture。
+    
+        item: pytest 用例项对象。
+    """
+
+    _cache_case_params(item)
 
 
 @pytest.hookimpl(hookwrapper=True)
@@ -347,17 +459,15 @@ def pytest_runtest_makereport(item, call):
     if rep.when == "teardown":
         attempt = _inc_attempt(item.config, nodeid)
 
-        driver = None
-        try:
-            driver = item.funcargs.get("driver")
-        except Exception:
-            driver = None
+        driver = _get_driver_from_item(item)
 
         ss_dir = Path(cfg["paths"]["screenshots"])
         ss_path = None
-        if driver is not None:
-            _cleanup_previous_screenshots(ss_dir, sheet_name)
-            ss_path = _take_screenshot(driver, ss_dir, sheet_name, attempt)
+        if driver is None:
+            log.warning("[PW][SS] driver missing, skip screenshot")
+        else:
+            _cleanup_previous_screenshots(ss_dir, sheet_name, nodeid)
+            ss_path = _take_screenshot(driver, ss_dir, sheet_name, nodeid, attempt)
 
         if getattr(item, "_pw_error", False):
             outc = "ERROR"
@@ -486,9 +596,10 @@ def pytest_sessionfinish(session, exitstatus):
             "start_time": "-",
             "end_time": "-",
         })
-        case_params[sheet_name] = {
-            "sheet_name": sheet_name,
-        }
+        case_params[sheet_name] = session.config._pw_case_params.get(
+            sheet_name,
+            {"sheet_name": sheet_name},
+        )
 
     total = len(results)
     passed = sum(1 for r in results if r.status == "PASS")

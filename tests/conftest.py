@@ -87,8 +87,15 @@ def driver(config, request):
         except Exception:
             pass
 
-    yield driver
-    DriverManager.quit()
+    try:
+        yield driver
+    finally:
+        try:
+            if hasattr(request.session, "driver"):
+                delattr(request.session, "driver")
+        except Exception:
+            pass
+        DriverManager.quit()
 
 
 def pytest_generate_tests(metafunc):
