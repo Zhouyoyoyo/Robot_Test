@@ -22,8 +22,8 @@ log = get_logger()
 @dataclass
 class AttemptRecord:
     """Author: taobo.zhou
-    中文：记录单次测试尝试的结果信息。
-    English: Record result information for a single test attempt.
+    记录单次测试尝试的结果信息。
+    Record result information for a single test attempt.
     """
 
     nodeid: str
@@ -38,8 +38,8 @@ class AttemptRecord:
 @dataclass
 class CaseResult:
     """Author: taobo.zhou
-    中文：记录最终用例执行结果的汇总信息。
-    English: Record aggregated final case execution information.
+    记录最终用例执行结果的汇总信息。
+    Record aggregated final case execution information.
     """
 
     case_id: str
@@ -56,8 +56,8 @@ class CaseResult:
 
 def _ensure_dir(p: Path) -> None:
     """Author: taobo.zhou
-    中文：创建目录（含父目录），目录已存在时忽略。
-    参数:
+    创建目录（含父目录），目录已存在时忽略。
+    
         p: 需要确保存在的目录路径。
     """
 
@@ -66,8 +66,8 @@ def _ensure_dir(p: Path) -> None:
 
 def _now_ts() -> str:
     """Author: taobo.zhou
-    中文：生成当前时间戳字符串。
-    参数: 无。
+    生成当前时间戳字符串。
+     无。
     """
 
     return time.strftime("%Y%m%d_%H%M%S")
@@ -75,8 +75,8 @@ def _now_ts() -> str:
 
 def _safe_name(s: str) -> str:
     """Author: taobo.zhou
-    中文：将字符串转换为安全的文件名片段。
-    参数:
+    将字符串转换为安全的文件名片段。
+    
         s: 需要转换的原始字符串。
     """
 
@@ -85,8 +85,8 @@ def _safe_name(s: str) -> str:
 
 def _take_screenshot(driver, out_dir: Path, sheet_name: str, attempt: int) -> Optional[str]:
     """Author: taobo.zhou
-    中文：保存当前页面截图并返回文件路径。
-    参数:
+    保存当前页面截图并返回文件路径。
+    
         driver: WebDriver 实例，用于执行截图。
         out_dir: 截图输出目录路径。
         sheet_name: 用例所属 sheet 名称，用于命名。
@@ -107,8 +107,8 @@ def _take_screenshot(driver, out_dir: Path, sheet_name: str, attempt: int) -> Op
 
 def _zip_dir(src_dir: Path, zip_path: Path) -> Optional[str]:
     """Author: taobo.zhou
-    中文：将目录内容打包为 zip 文件并返回路径。
-    参数:
+    将目录内容打包为 zip 文件并返回路径。
+    
         src_dir: 需要打包的源目录。
         zip_path: 目标 zip 文件路径。
     """
@@ -127,8 +127,8 @@ def _zip_dir(src_dir: Path, zip_path: Path) -> Optional[str]:
 
 def _get_sheet_name(item) -> str:
     """Author: taobo.zhou
-    中文：从 pytest item 中获取 sheet 名称。
-    参数:
+    从 pytest item 中获取 sheet 名称。
+    
         item: pytest 用例项对象。
     """
 
@@ -142,8 +142,8 @@ def _get_sheet_name(item) -> str:
 
 def _get_attempt(config, nodeid: str) -> int:
     """Author: taobo.zhou
-    中文：获取当前用例的尝试序号。
-    参数:
+    获取当前用例的尝试序号。
+    
         config: pytest 配置对象，包含尝试计数缓存。
         nodeid: 用例唯一标识。
     """
@@ -153,8 +153,8 @@ def _get_attempt(config, nodeid: str) -> int:
 
 def _inc_attempt(config, nodeid: str) -> int:
     """Author: taobo.zhou
-    中文：递增并返回用例的尝试序号。
-    参数:
+    递增并返回用例的尝试序号。
+    
         config: pytest 配置对象，包含尝试计数缓存。
         nodeid: 用例唯一标识。
     """
@@ -165,8 +165,8 @@ def _inc_attempt(config, nodeid: str) -> int:
 
 def _is_assertion_failure(call):
     """Author: taobo.zhou
-    中文：判断调用结果是否为断言失败。
-    参数:
+    判断调用结果是否为断言失败。
+    
         call: pytest 的 call 对象，包含执行异常信息。
     """
 
@@ -189,8 +189,8 @@ def _is_assertion_failure(call):
 
 def _should_retry_error(longrepr: Optional[str], policy: dict) -> bool:
     """Author: taobo.zhou
-    中文：根据错误信息与策略判断是否允许重跑。
-    参数:
+    根据错误信息与策略判断是否允许重跑。
+    
         longrepr: 错误的详细信息字符串。
         policy: 重跑策略配置字典。
     """
@@ -218,8 +218,8 @@ def _should_retry_error(longrepr: Optional[str], policy: dict) -> bool:
 
 def _normalize_status(outc: str) -> str:
     """Author: taobo.zhou
-    中文：将 pytest 结果状态标准化为报告状态。
-    参数:
+    将 pytest 结果状态标准化为报告状态。
+    
         outc: pytest 原始状态字符串。
     """
 
@@ -234,8 +234,8 @@ def _normalize_status(outc: str) -> str:
 
 def pytest_addoption(parser):
     """Author: taobo.zhou
-    中文：注册 pytest 命令行参数。
-    参数:
+    注册 pytest 命令行参数。
+    
         parser: pytest 参数解析器。
     """
 
@@ -246,8 +246,8 @@ def pytest_addoption(parser):
 
 def pytest_configure(config):
     """Author: taobo.zhou
-    中文：初始化 pytest 配置与重跑策略。
-    参数:
+    初始化 pytest 配置与重跑策略。
+    
         config: pytest 配置对象。
     """
 
@@ -297,8 +297,8 @@ def pytest_configure(config):
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     """Author: taobo.zhou
-    中文：处理用例阶段结果并记录截图与重跑状态。
-    参数:
+    处理用例阶段结果并记录截图与重跑状态。
+    
         item: pytest 用例项对象。
         call: pytest 调用信息对象。
     """
@@ -397,8 +397,8 @@ def pytest_runtest_makereport(item, call):
 
 def pytest_runtestloop(session):
     """Author: taobo.zhou
-    中文：实现 pytest 用例循环执行与 ERROR 重跑逻辑。
-    参数:
+    实现 pytest 用例循环执行与 ERROR 重跑逻辑。
+    
         session: pytest 会话对象。
     """
 
@@ -437,8 +437,8 @@ def pytest_runtestloop(session):
 
 def pytest_sessionfinish(session, exitstatus):
     """Author: taobo.zhou
-    中文：汇总最终态结果，生成报告并发送邮件。
-    参数:
+    汇总最终态结果，生成报告并发送邮件。
+    
         session: pytest 会话对象。
         exitstatus: pytest 退出状态码。
     """

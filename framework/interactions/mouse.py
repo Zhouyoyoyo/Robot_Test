@@ -3,14 +3,14 @@ from selenium.webdriver import ActionChains
 
 class MouseMixin:
     """Author: taobo.zhou
-    中文：鼠标交互混入类，提供鼠标点击操作。
-    English: Mouse interaction mixin providing mouse click operations.
+    鼠标交互混入类，提供鼠标点击操作。
+    Mouse interaction mixin providing mouse click operations.
     """
 
     def click(self, name):
         """Author: taobo.zhou
-        中文：执行鼠标单击。
-        参数:
+        执行鼠标单击。
+        
             name: 定位器名称。
         """
 
@@ -20,8 +20,8 @@ class MouseMixin:
 
     def double_click(self, name):
         """Author: taobo.zhou
-        中文：执行鼠标双击。
-        参数:
+        执行鼠标双击。
+        
             name: 定位器名称。
         """
 
@@ -31,8 +31,8 @@ class MouseMixin:
 
     def mouse_click(self, name, double: bool = False):
         """Author: taobo.zhou
-        中文：滚动到元素后执行单击或双击。
-        参数:
+        滚动到元素后执行单击或双击。
+        
             name: 定位器名称。
             double: 是否执行双击。
         """

@@ -3,8 +3,8 @@ import logging
 
 def get_logger():
     """Author: taobo.zhou
-    中文：获取 PingID 日志记录器。
-    参数: 无。
+    获取 PingID 日志记录器。
+     无。
     """
 
     logger = logging.getLogger("PINGID")

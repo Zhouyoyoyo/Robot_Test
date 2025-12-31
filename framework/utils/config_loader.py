@@ -9,8 +9,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 def load_config(path: str | Path = "config.yaml") -> dict:
     """Author: taobo.zhou
-    中文：加载 YAML 配置文件并返回字典。
-    参数:
+    加载 YAML 配置文件并返回字典。
+    
         path: 配置文件路径，支持相对路径。
     """
 

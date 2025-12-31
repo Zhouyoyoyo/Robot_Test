@@ -8,8 +8,8 @@ log = get_logger()
 
 def clear_clipboard():
     """Author: taobo.zhou
-    中文：清空系统剪贴板内容。
-    参数: 无。
+    清空系统剪贴板内容。
+     无。
     """
 
     try:
@@ -23,8 +23,8 @@ def clear_clipboard():
 
 def read_otp_from_clipboard(timeout_sec: float = 3.0) -> str:
     """Author: taobo.zhou
-    中文：从剪贴板读取 OTP 验证码。
-    参数:
+    从剪贴板读取 OTP 验证码。
+    
         timeout_sec: 读取超时时间（秒）。
     """
 

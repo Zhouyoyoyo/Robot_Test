@@ -3,8 +3,8 @@ from framework.driver.driver_factory import create_driver
 
 class DriverManager:
     """Author: taobo.zhou
-    中文：驱动管理器，统一创建与释放浏览器驱动。
-    English: Driver manager that creates and disposes browser drivers.
+    驱动管理器，统一创建与释放浏览器驱动。
+    Driver manager that creates and disposes browser drivers.
     """
 
     _driver = None
@@ -12,8 +12,8 @@ class DriverManager:
     @classmethod
     def get_driver(cls):
         """Author: taobo.zhou
-        中文：获取单例 WebDriver 实例，不存在则创建。
-        参数:
+        获取单例 WebDriver 实例，不存在则创建。
+        
             cls: 类对象。
         """
 
@@ -24,8 +24,8 @@ class DriverManager:
     @classmethod
     def quit(cls):
         """Author: taobo.zhou
-        中文：关闭并清理 WebDriver 实例。
-        参数:
+        关闭并清理 WebDriver 实例。
+        
             cls: 类对象。
         """
 
@@ -36,8 +36,8 @@ class DriverManager:
     @classmethod
     def quit_driver(cls):
         """Author: taobo.zhou
-        中文：兼容旧接口的退出方法。
-        参数:
+        兼容旧接口的退出方法。
+        
             cls: 类对象。
         """
 

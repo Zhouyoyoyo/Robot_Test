@@ -12,8 +12,8 @@ def build_html_report(
     case_params: Dict[str, Dict[str, Any]],
 ) -> Dict[str, Any]:
     """Author: taobo.zhou
-    中文：构建 HTML 报告内容及附件信息。
-    参数:
+    构建 HTML 报告内容及附件信息。
+    
         results: 用例结果列表。
         case_params: 用例参数字典。
     """
@@ -23,8 +23,8 @@ def build_html_report(
 
     def new_cid() -> str:
         """Author: taobo.zhou
-        中文：生成内联图片的内容 ID。
-        参数: 无。
+        生成内联图片的内容 ID。
+         无。
         """
 
         return f"img_{uuid.uuid4().hex}@report"

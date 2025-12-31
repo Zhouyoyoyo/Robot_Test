@@ -3,14 +3,14 @@ from framework.core.base_page import BasePage
 
 class SoftwareContainerPage(BasePage):
     """Author: taobo.zhou
-    中文：软件容器页面对象，封装版本创建与上传流程。
-    English: Software container page object for version creation and upload flows.
+    软件容器页面对象，封装版本创建与上传流程。
+    Software container page object for version creation and upload flows.
     """
 
     def __init__(self, driver, locator_loader):
         """Author: taobo.zhou
-        中文：初始化软件容器页面对象。
-        参数:
+        初始化软件容器页面对象。
+        
             driver: WebDriver 实例。
             locator_loader: 定位器加载器实例。
         """
@@ -29,8 +29,8 @@ class SoftwareContainerPage(BasePage):
         file_upload_flashware: str,
     ):
         """Author: taobo.zhou
-        中文：创建软件容器版本并完成文件上传。
-        参数:
+        创建软件容器版本并完成文件上传。
+        
             version: 版本选择值。
             semantic_version: 语义版本号。
             general_setting: 通用设置选项。

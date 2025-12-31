@@ -7,8 +7,8 @@ from pathlib import Path
 
 def _default_lock_path() -> Path:
     """Author: taobo.zhou
-    中文：生成默认的 PingID 全局锁文件路径。
-    参数: 无。
+    生成默认的 PingID 全局锁文件路径。
+     无。
     """
 
     project_root = Path(__file__).resolve().parents[2]
@@ -20,8 +20,8 @@ def _default_lock_path() -> Path:
 @contextmanager
 def pingid_global_lock():
     """Author: taobo.zhou
-    中文：创建跨进程的 PingID 文件锁上下文。
-    参数: 无。
+    创建跨进程的 PingID 文件锁上下文。
+     无。
     """
 
     lockfile = os.environ.get("PW_PINGID_LOCKFILE")

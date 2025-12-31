@@ -4,14 +4,14 @@ from framework.pingid_reader import PingIDOtpManager
 
 class LoginPage(BasePage):
     """Author: taobo.zhou
-    中文：登录页面对象，封装登录流程相关操作。
-    English: Login page object that encapsulates login flow operations.
+    登录页面对象，封装登录流程相关操作。
+    Login page object that encapsulates login flow operations.
     """
 
     def __init__(self, driver, locator_loader):
         """Author: taobo.zhou
-        中文：初始化登录页面对象。
-        参数:
+        初始化登录页面对象。
+        
             driver: WebDriver 实例。
             locator_loader: 定位器加载器实例。
         """
@@ -20,8 +20,8 @@ class LoginPage(BasePage):
 
     def login(self, username: str, password: str):
         """Author: taobo.zhou
-        中文：执行用户登录并完成 PingID 验证。
-        参数:
+        执行用户登录并完成 PingID 验证。
+        
             username: 登录用户名。
             password: 登录密码。
         """

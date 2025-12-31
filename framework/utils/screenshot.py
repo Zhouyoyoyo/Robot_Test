@@ -9,8 +9,8 @@ def take_screenshot(
     stable: bool = False,
 ) -> str:
     """Author: taobo.zhou
-    中文：保存截图并返回文件路径。
-    参数:
+    保存截图并返回文件路径。
+    
         driver: WebDriver 实例。
         folder: 截图输出目录。
         prefix: 文件名前缀。

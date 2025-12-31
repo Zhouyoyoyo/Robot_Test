@@ -8,8 +8,8 @@ from framework.utils.config_loader import load_config
 
 def create_driver(browser: str | None = None):
     """Author: taobo.zhou
-    中文：根据配置创建并返回浏览器驱动。
-    参数:
+    根据配置创建并返回浏览器驱动。
+    
         browser: 浏览器类型，可为 chrome、edge、firefox，未传则读取配置。
     """
 

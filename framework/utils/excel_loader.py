@@ -3,8 +3,8 @@ from openpyxl import load_workbook
 
 def load_excel_kv(path: str, sheet_name: str) -> dict:
     """Author: taobo.zhou
-    中文：从 Excel 指定 sheet 读取键值对数据。
-    参数:
+    从 Excel 指定 sheet 读取键值对数据。
+    
         path: Excel 文件路径。
         sheet_name: 需要读取的 sheet 名称。
     """
@@ -30,8 +30,8 @@ def load_excel_kv(path: str, sheet_name: str) -> dict:
 
 def load_excel_sheets_kv(path: str) -> dict:
     """Author: taobo.zhou
-    中文：读取 Excel 中的所有 sheet 并返回键值对集合。
-    参数:
+    读取 Excel 中的所有 sheet 并返回键值对集合。
+    
         path: Excel 文件路径。
     """
 

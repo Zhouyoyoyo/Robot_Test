@@ -12,8 +12,8 @@ from framework.utils.locator_loader import LocatorLoader
 @pytest.fixture(scope="session")
 def config():
     """Author: taobo.zhou
-    中文：加载并补全全局配置。
-    参数: 无。
+    加载并补全全局配置。
+     无。
     """
 
     cfg = load_config()
@@ -35,8 +35,8 @@ def config():
 @pytest.fixture(scope="session")
 def driver(config, request):
     """Author: taobo.zhou
-    中文：初始化浏览器驱动并在会话结束时关闭。
-    参数:
+    初始化浏览器驱动并在会话结束时关闭。
+    
         config: 全局配置字典。
         request: pytest 请求对象，用于挂载 driver。
     """
@@ -65,8 +65,8 @@ def driver(config, request):
 
 def pytest_generate_tests(metafunc):
     """Author: taobo.zhou
-    中文：将 Excel 中的每个 sheet 转换为 pytest 用例。
-    参数:
+    将 Excel 中的每个 sheet 转换为 pytest 用例。
+    
         metafunc: pytest 的参数化元对象。
     """
 
@@ -105,8 +105,8 @@ def pytest_generate_tests(metafunc):
 @pytest.fixture
 def case_data(config, sheet_name):
     """Author: taobo.zhou
-    中文：读取当前 sheet_name 对应的测试数据。
-    参数:
+    读取当前 sheet_name 对应的测试数据。
+    
         config: 全局配置字典。
         sheet_name: Excel sheet 名称。
     """
@@ -120,8 +120,8 @@ def case_data(config, sheet_name):
 @pytest.fixture
 def base_url(config, sheet_name):
     """Author: taobo.zhou
-    中文：获取当前 sheet_name 对应的基础 URL。
-    参数:
+    获取当前 sheet_name 对应的基础 URL。
+    
         config: 全局配置字典。
         sheet_name: Excel sheet 名称。
     """

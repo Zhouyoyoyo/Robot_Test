@@ -1,13 +1,13 @@
 class JsMixin:
     """Author: taobo.zhou
-    中文：JavaScript 交互混入类，提供脚本执行能力。
-    English: JavaScript interaction mixin providing script execution.
+    JavaScript 交互混入类，提供脚本执行能力。
+    JavaScript interaction mixin providing script execution.
     """
 
     def js_click(self, name):
         """Author: taobo.zhou
-        中文：通过 JavaScript 触发元素点击。
-        参数:
+        通过 JavaScript 触发元素点击。
+        
             name: 定位器名称。
         """
 
@@ -17,8 +17,8 @@ class JsMixin:
 
     def execute_js(self, script, *args):
         """Author: taobo.zhou
-        中文：执行自定义 JavaScript 并返回结果。
-        参数:
+        执行自定义 JavaScript 并返回结果。
+        
             script: JavaScript 脚本字符串。
             *args: 传递给脚本的参数。
         """
@@ -28,8 +28,8 @@ class JsMixin:
 
     def set_dom_property(self, locator_name, prop, value):
         """Author: taobo.zhou
-        中文：设置元素的 DOM 属性值。
-        参数:
+        设置元素的 DOM 属性值。
+        
             locator_name: 定位器名称。
             prop: DOM 属性名。
             value: DOM 属性值。

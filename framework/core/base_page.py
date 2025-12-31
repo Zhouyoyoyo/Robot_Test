@@ -14,14 +14,14 @@ class BasePage(
     ShadowDomMixin,
 ):
     """Author: taobo.zhou
-    中文：页面基类，提供通用交互与日志能力。
-    English: Base page class providing common interactions and logging.
+    页面基类，提供通用交互与日志能力。
+    Base page class providing common interactions and logging.
     """
 
     def __init__(self, driver, locator_loader, page_name=None):
         """Author: taobo.zhou
-        中文：初始化页面基类并绑定驱动与定位器。
-        参数:
+        初始化页面基类并绑定驱动与定位器。
+        
             driver: WebDriver 实例。
             locator_loader: 定位器加载器实例。
             page_name: 页面名称，可为空。
@@ -35,8 +35,8 @@ class BasePage(
 
     def _init_logger(self):
         """Author: taobo.zhou
-        中文：初始化页面级日志记录器。
-        参数: 无。
+        初始化页面级日志记录器。
+         无。
         """
 
         from framework.utils.logger import get_page_logger
@@ -45,8 +45,8 @@ class BasePage(
 
     def _bind_driver_to_mixins(self, driver):
         """Author: taobo.zhou
-        中文：将 WebDriver 绑定到各交互混入类。
-        参数:
+        将 WebDriver 绑定到各交互混入类。
+        
             driver: WebDriver 实例。
         """
 
@@ -55,8 +55,8 @@ class BasePage(
 
     def _before_action(self, action: str, target: str | None = None):
         """Author: taobo.zhou
-        中文：动作执行前的钩子方法。
-        参数:
+        动作执行前的钩子方法。
+        
             action: 将要执行的动作名称。
             target: 目标元素或定位器名称，可为空。
         """
