@@ -44,7 +44,6 @@ pywin32
 编辑 config.yaml，配置 Selenium 与输出路径等信息：
 
 yaml
-复制代码
 selenium:
   browser: chrome
   implicit_wait: 5
@@ -57,8 +56,6 @@ paths:
 2.2 元素定位配置 / Locator Config
 编辑：
 
-bash
-复制代码
 locators/locator.yaml
 用于集中管理页面元素定位方式（id / xpath / css / shadow dom 等），
 避免在 Page Object 中硬编码定位器。
@@ -66,8 +63,6 @@ locators/locator.yaml
 2.3 测试数据准备 / Test Data
 编辑 Excel 文件：
 
-bash
-复制代码
 data/testdata.xlsx
 说明：
 
@@ -79,8 +74,6 @@ data/testdata.xlsx
 
 3️⃣ 执行测试 / Run Tests
 方式一：通过 run.py（推荐）
-bash
-复制代码
 python run.py
 特点：
 
@@ -93,13 +86,8 @@ python run.py
 生成统一 JSON 结果文件
 
 方式二：直接使用 pytest
-bash
-复制代码
 pytest
 或指定 Sheet：
-
-bash
-复制代码
 pytest --pw-sheet aurix_app
 4️⃣ 浏览器截图机制说明 / Browser Screenshot Mechanism
 📸 截图行为说明
@@ -122,13 +110,11 @@ pytest --pw-sheet aurix_app
 
 截图文件示例：
 
-复制代码
+
 aurix_fbl__tests_test_automatic_uploading_MBOS_CALL.png
 5️⃣ 输出结构 / Output Structure
 测试执行完成后，将生成如下目录结构：
 
-lua
-复制代码
 output/
 └── runs/
     └── 20260104_141333/
