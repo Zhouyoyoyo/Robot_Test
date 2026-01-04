@@ -1,8 +1,8 @@
 project:
   browser: edge
   urls:
-   aurix_app: https://portal.mbos.mercedes-benz.com/software-container/container/ec844239-9088-46e5-a5c3-098247fffaea/overview
-   aurix_fbl: https://portal.mbos.mercedes-benz.com/software-container/container/e243eaa9-c7f5-4116-b1ec-7c663d3f522c/overview
+   aurix_app: https://demo.app
+   aurix_fbl: https://demo.fbl
    
 paths:
   data: data/testdata.xlsx
