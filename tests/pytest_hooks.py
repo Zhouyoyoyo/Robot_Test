@@ -8,7 +8,7 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-
+from PIL import Image, ImageDraw
 import pytest
 import yaml
 
@@ -410,6 +410,13 @@ def pytest_runtest_call(item):
 
     _cache_case_params(item)
 
+from PIL import ImageGrab
+from pathlib import Path
+
+def _take_windows_screenshot(path: Path):
+    img = ImageGrab.grab()  # 截当前 Windows 屏幕
+    img.save(path)
+
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
@@ -436,6 +443,34 @@ def pytest_runtest_makereport(item, call):
         item._pw_call_longrepr = None
 
     if rep.when == "call":
+
+        try:
+            driver = _get_driver_from_item(item)
+            if driver:
+                ss_dir = Path(cfg["paths"]["screenshots"])
+                ss_dir.mkdir(parents=True, exist_ok=True)
+
+                safe_nodeid = nodeid.replace("::", "__").replace("/", "_")
+                ss_path = ss_dir / f"{sheet_name}__{safe_nodeid}_CALL.png"
+
+                driver.save_screenshot(str(ss_path))
+                item._pw_call_screenshot = str(ss_path)
+
+                log.info(
+                    f"[PW][SS][CALL] browser screenshot captured | "
+                    f"nodeid={nodeid} | path={ss_path}"
+                )
+            else:
+                log.warning(
+                    f"[PW][SS][CALL] driver is None, skip browser screenshot | "
+                    f"nodeid={nodeid}"
+                )
+        except Exception as e:
+            log.exception(
+                f"[PW][SS][CALL] browser screenshot FAILED | "
+                f"nodeid={nodeid} | error={e}"
+            )
+
         if rep.failed:
             if _is_assertion_failure(call):
                 item._pw_call_outcome = "FAILED"
@@ -461,13 +496,7 @@ def pytest_runtest_makereport(item, call):
 
         driver = _get_driver_from_item(item)
 
-        ss_dir = Path(cfg["paths"]["screenshots"])
-        ss_path = None
-        if driver is None:
-            log.warning("[PW][SS] driver missing, skip screenshot")
-        else:
-            _cleanup_previous_screenshots(ss_dir, sheet_name, nodeid)
-            ss_path = _take_screenshot(driver, ss_dir, sheet_name, nodeid, attempt)
+        ss_path = getattr(item, "_pw_call_screenshot", None)
 
         if getattr(item, "_pw_error", False):
             outc = "ERROR"
