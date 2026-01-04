@@ -22,8 +22,7 @@
 python -m venv .venv
 .venv\Scripts\activate   # Windows
 安装依赖 / Install Dependencies
-bash
-复制代码
+
 pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 主要依赖包括（但不限于）：
 
