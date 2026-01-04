@@ -8,7 +8,6 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-from PIL import Image, ImageDraw
 import pytest
 import yaml
 
